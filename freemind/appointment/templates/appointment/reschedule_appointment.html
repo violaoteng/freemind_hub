@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+
+<div class="container mt-5">
+<h2>Reschedule Appointment</h2>
+<p>Current Date: {{ appointment.date }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="new_date">New Date and Time:</label>
+    <input type="datetime-local" id="new_date" name="new_date"  required min="{% now 'Y-m-d\TH:i' %}" >
+    <div class="invalid-feedback" id="dateError">
+        Please select a future date and time.
+    </div>
+    <button type="submit" class="btn btn-primary">Reschedule</button>
+</form>
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('rescheduleForm');
+    const dateInput = document.getElementById('new_date');
+    const dateError = document.getElementById('dateError');
+    
+    // Set minimum datetime to now (client-side)
+    const now = new Date();
+    const timezoneOffset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now - timezoneOffset)).toISOString().slice(0, 16);
+    dateInput.min = localISOTime;
+    
+    form.addEventListener('submit', function(e) {
+        const selectedDate = new Date(dateInput.value);
+        const currentDate = new Date();
+        
+        if (selectedDate <= currentDate) {
+            e.preventDefault();
+            dateInput.classList.add('is-invalid');
+            dateError.style.display = 'block';
+        } else {
+            dateInput.classList.remove('is-invalid');
+            dateError.style.display = 'none';
+        }
+    });
+    
+    // Real-time validation as user selects
+    dateInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const currentDate = new Date();
+        
+        if (selectedDate <= currentDate) {
+            this.classList.add('is-invalid');
+            dateError.style.display = 'block';
+        } else {
+            this.classList.remove('is-invalid');
+            dateError.style.display = 'none';
+        }
+    });
+});
+</script>
+
+{% endblock %}

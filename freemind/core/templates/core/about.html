@@ -1,0 +1,138 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div id="about-us" class="py-5 bg-light ">
+    <div class="container-fluid">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold " style="color: #970747;">About FreeMind Hub</h1>
+            <h2 class="text-muted">Empowering Minds, One Connection at a Time</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <p class="lead" style="color: #000;" >At <strong>FreeMind Hub</strong>, we believe mental health care should be accessible, compassionate, and free from stigma.
+                     Our mission is to create a safe, inclusive, and innovative space where individuals can connect with licensed mental health professionals and access resources—all from the comfort of their own space.</p>
+                <p style="color: #000;">FreeMind Hub is more than just a telemedicine app; it’s a community dedicated to breaking down barriers to mental health care.
+                    We recognize that mental health challenges affect people from all walks of life, and seeking support should never be complicated or intimidating. 
+                    That’s why we have designed our platform to be user-friendly, ensuring that everyone—regardless of their background or circumstances—can find the help they need with ease.
+                </p>
+                <p style="color: #000;">
+                    Through our platform, individuals can connect with professionals who understand their unique struggles, whether it’s stress, anxiety, depression, burnout, or personal growth challenges. 
+                    We also provide a growing library of self-help tools, expert-led workshops, and wellness programs that cater to different mental health needs.
+                </p>
+                
+                <p style="color: #000;">
+                    At FreeMind Hub, we believe in the power of community. Mental health is not just about therapy sessions—it’s about building a supportive environment where people feel heard and valued. 
+                    Our forums, support groups, and guided wellness sessions allow individuals to share their experiences, learn from others, and foster meaningful connections. 
+                    No one should have to face their struggles alone, and with FreeMind Hub, they never have to.
+                </p>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'img/home.jpg' %}" class="img-fluid rounded shadow" alt="FreeMind Hub">
+            </div>
+        </div>
+
+        <!-- Our Story -->
+        <div class="mt-5">
+            <h3 class=" fw-bold"  style="color: #970747;" >Our Story</h3>
+            <p style="color: #000;">FreeMind Hub was born out of a simple yet powerful idea: <strong>mental health care should be free—free from judgment, free from obstacles, and free for everyone.</strong></p>
+            <p style="color: #000;" >Founded in 2020 by mental health advocates and healthcare professionals, FreeMind Hub addresses the challenges of long wait times, high costs, and stigma in traditional mental health care.</p>
+        </div>
+
+        <!-- Our Mission -->
+        <div class="mt-5">
+            <h3 class="fw-bold"  style="color: #970747;" >Our Mission</h3>
+            <p style="color: #000;" >We aim to make mental health care accessible to all by:</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>🌍 Democratizing Mental Health Care:</strong> Affordable and flexible options for everyone.</li>
+                <li class="list-group-item"><strong>💬 Breaking the Stigma:</strong> Normalizing conversations about mental health.</li>
+                <li class="list-group-item"><strong>🚀 Empowering Individuals:</strong> Personalized care and self-help resources.</li>
+            </ul>
+        </div>
+
+        <!-- What Sets Us Apart -->
+        <div class="mt-5">
+            <h3 class=" fw-bold"  style="color: #970747;">What Sets Us Apart</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>📅 Accessible Anytime, Anywhere:</strong> Connect with professionals from anywhere.</li>
+                        <li class="list-group-item"><strong>💰 Affordable Care:</strong> Sliding-scale fees and free resources.</li>
+                        <li class="list-group-item"><strong>🤝 Personalized Matching:</strong> Automated therapist-patient matching.</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>🧘‍♂️ Holistic Approach:</strong> Therapy, guided meditations, and community support.</li>
+                        <li class="list-group-item"><strong>🔒 Secure & Confidential:</strong> Encrypted data for privacy.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Our Values -->
+        <div class="mt-5">
+            <h3 class="fw-bold" style="color: #970747;">Our Values</h3>
+            <ul class="list-inline">
+                <li class="list-inline-item badge text-white p-3 m-2" style="background-color: #970747;">Compassion</li>
+                <li class="list-inline-item badge text-white p-3 m-2" style="background-color: #D63384;">Inclusivity</li>
+                <li class="list-inline-item badge text-white p-3 m-2" style="background-color: #FF69B4;">Innovation</li>
+                <li class="list-inline-item badge text-white p-3 m-2" style="background-color: #6A0DAD;">Integrity</li>
+            </ul>
+            
+        </div>
+
+          <!-- Meet the Team -->
+          <div class="mt-5 text-center">
+            <h3 class=" fw-bold"  style="color: #970747;">Meet the Team</h3>
+            <p style="color: #000;">Our dedicated team is here to ensure you receive the best mental health support possible.</p>
+            <div class="row mt-4">
+                <!-- Team Member 1 -->
+                <div class="col-md-4">
+                    <div class="card shadow border-0">
+                        <img src="{% static 'img/team-1.jpg' %}" class="card-img-top rounded-top" alt="Team Member 1">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-primary">Dr. Issa Rae Solana</h5>
+                            <p class="card-text text-muted">Lead Psychologist</p>
+                            <p>With 10+ years of experience in cognitive behavioral therapy, Issa is dedicated to helping patients regain control over their mental well-being especially teenages.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="col-md-4">
+                    <div class="card shadow border-0">
+                        <img src="{% static 'img/team-2.jpg' %}" class="card-img-top rounded-top" alt="Team Member 2">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-primary">Rashel Smith</h5>
+                            <p class="card-text text-muted">Mental Health Advocate</p>
+                            <p>Rashel is passionate about spreading mental health awareness and ensuring accessible care for all individuals.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="col-md-4">
+                    <div class="card shadow border-0">
+                        <img src="{% static 'img/team-4.jpg' %}" class="card-img-top rounded-top" alt="Team Member 3">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-primary">Wace Wamalwa</h5>
+                            <p class="card-text text-muted">Licensed Therapist</p>
+                            <p style="color: #000;">Wace specializes in couple therapy and stress management, offering tailored sessions to help clients navigate life's challenges.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Join the Community -->
+        <div class="mt-5 text-center">
+            <h3 class="fw-bold"  style="color: #970747;">Join the FreeMind Hub Community</h3>
+            <p style="color: #000;">Whether you're seeking support or want to improve your well-being, we're here for you.</p>
+            <p style="color: #000;"><strong>Welcome to FreeMind Hub. Your mind matters. 💙</strong></p>
+            <a href="{% url 'register' %}" class="btn btn-lg btn-primary">Join Now</a>
+        </div>
+    </div>
+  </div>
+{% endblock %}

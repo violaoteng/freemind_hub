@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Appointments</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.status }}</td>
+                <td>
+                    {% if appointment.status == "Pending" %}
+                    <form method="POST" action="{% url 'confirm_appointment' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Confirm</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No appointments scheduled.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | 404</title>
+    <!-- Bootstrap 5 CSS (optional) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .error-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            color: #dc3545;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .home-btn {
+            padding: 10px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 80px;
+            }
+            .error-message {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <h1 class="error-message">Oops! Page Not Found</h1>
+        <p class="lead">The page you're looking for doesn't exist or has been moved.</p>
+        <div class="mt-4">
+            <a href="/" class="btn btn-primary home-btn">
+                <i class="fas fa-home me-2"></i>Return Home
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary home-btn ms-2">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons (optional) -->
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+    <!-- Replace 'your-code.js' with your actual Font Awesome kit code -->
+</body>
+</html>

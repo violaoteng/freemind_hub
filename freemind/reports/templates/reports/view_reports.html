@@ -1,0 +1,183 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Appointment Reports</h2>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <a href="?filter=all" class="text-decoration-none">
+                <div class="card text-white bg-primary hover-shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Appointments</h5>
+                        <p class="card-text display-4">{{ total_appointments }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="?filter=today" class="text-decoration-none">
+                <div class="card text-white bg-success hover-shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Today</h5>
+                        <p class="card-text display-4">{{ today_appointments }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="?filter=week" class="text-decoration-none">
+                <div class="card text-white bg-info hover-shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">This Week</h5>
+                        <p class="card-text display-4">{{ weekly_appointments }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="?filter=month" class="text-decoration-none">
+                <div class="card text-white bg-warning hover-shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">This Month</h5>
+                        <p class="card-text display-4">{{ monthly_appointments }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    
+    <!-- Status Breakdown - Table Only -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Appointment Status Breakdown</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for status in status_counts %}
+                    <tr>
+                        <td>{{ status.status }}</td>
+                        <td>{{ status.count }}</td>
+                        <td>{{ status.percentage|floatformat:1 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+   <!-- Therapist Workload with Search and Pagination -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Therapist Workload</h4>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <input type="text" id="therapistSearch" class="form-control" placeholder="Search therapists...">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Therapist</th>
+                        <th>Total</th>
+                        <th>Completed</th>
+                        <th>Cancelled</th>
+                        <th>No Show</th>
+                        <th>Completion Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for therapist in therapist_workload %}
+                    <tr class="therapist-row">
+                        <td>{{ therapist.user.username }}</td>
+                        <td>{{ therapist.total_appointments }}</td>
+                        <td>{{ therapist.completed }}</td>
+                        <td>{{ therapist.cancelled }}</td>
+                        <td>{{ therapist.no_show }}</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     id="progress_{{ therapist.therapist__user__id }}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ therapist.completion_rate }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if therapist_workload.has_other_pages %}
+        <nav aria-label="Therapist workload pagination">
+            <ul class="pagination justify-content-center">
+                {% if therapist_workload.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ therapist_workload.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                {% for i in therapist_workload.paginator.page_range %}
+                    {% if therapist_workload.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if therapist_workload.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ therapist_workload.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        <div class="mt-3">
+            <a href="{% url 'download_report' %}?{{ request.GET.urlencode }}&report_type=therapist_workload" class="btn btn-success">
+                <i class="fas fa-download"></i> Download Therapist Workload
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- JavaScript for Search -->
+<script>
+    // Therapist Search Functionality
+    document.getElementById('therapistSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.therapist-row').forEach(row => {
+            const therapistName = row.cells[0].textContent.toLowerCase();
+            row.style.display = therapistName.includes(searchTerm) ? '' : 'none';
+        });
+    });
+</script>
+
+{% endblock %}

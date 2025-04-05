@@ -1,0 +1,157 @@
+/* ===== General Styles ===== */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ff85c2;
+    color: #333;
+}
+
+/* Centered Container */
+.container-fluid .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Headings */
+h1, h2 {
+    color: #970747; /* Theme Color */
+}
+
+/* ===== Forms Styles ===== */
+form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="date"],
+select,
+button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Buttons */
+button, .btn-primary {
+    background-color: #970747;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out;
+}
+
+button:hover, .btn-primary:hover {
+    background-color: #750535;
+}
+
+/* ===== Flash Messages ===== */
+.message {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.message.success {
+    background-color: #3c763d;
+    color: #ffffff;
+}
+
+.message.error {
+    background-color: #af0e0b;
+    color: #f2dede;
+}
+
+/* ===== Therapy Services Styles ===== */
+.therapy-services {
+    background-color: #ffeff7; /* Light Pink Background */
+    padding: 80px 20px;
+    border-radius: 12px;
+}
+
+.section-title h1 {
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #970747; /* Theme Color */
+}
+
+.section-title p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* Therapy Cards */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Images */
+.card-img-top {
+    height: 220px;
+    object-fit: cover;
+}
+
+/* Card Body */
+.card-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #970747;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Icons */
+.card-title i {
+    color: #970747;
+    margin-right: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .therapy-services {
+        padding: 50px 15px;
+    }
+
+    .section-title h1 {
+        font-size: 2.2rem;
+    }
+
+    .card {
+        margin-bottom: 20px;
+    }
+}

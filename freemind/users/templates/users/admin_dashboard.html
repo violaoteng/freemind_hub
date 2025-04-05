@@ -1,0 +1,396 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, {{ user.username }}! Manage users and view reports here.</p>
+    <!-- Quick Links -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Quick Actions</h4>
+        </div>
+        <div class="card-body">
+            <div class="list-group list-group-horizontal">
+                <a href="{% url 'view_patients' %}" class="list-group-item list-group-item-action">View Patients</a>
+                <a href="{% url 'add_therapist' %}" class="list-group-item list-group-item-action">Add Therapist</a>
+                <a href="{% url 'view_reports' %}" class="list-group-item list-group-item-action">View Full Reports</a>
+                <a href="{% url 'therapist_list' %}" class="list-group-item list-group-item-action">View Therapists</a>
+                <a href="{% url 'manage_specializations' %}" class="list-group-item list-group-item-action">Add Specialization</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Growth Chart -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>User Growth (Last 30 Days)</h4>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="chartRangeDropdown" data-bs-toggle="dropdown">
+                    Last 30 Days
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item chart-range" data-days="7">Last 7 Days</a></li>
+                    <li><a class="dropdown-item chart-range" data-days="30">Last 30 Days</a></li>
+                    <li><a class="dropdown-item chart-range" data-days="90">Last 90 Days</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="chart-container" style="position: relative; height:300px;">
+                <canvas id="registrationChart"></canvas>
+            </div>
+            <div class="mt-2 text-muted small">
+                <i class="fas fa-info-circle"></i> Shows new user registrations over time
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Sections -->
+    <div class="row">
+        <!-- Therapist Utilization -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Therapist Utilization</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Therapist</th>
+                                    <th>Patients</th>
+                                    <th>Available Slots</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for therapist in therapist_utilization %}
+                                <tr>
+                                    <td>{{ therapist.user.get_full_name }}</td>
+                                    <td>{{ therapist.patient_count }}</td>
+                                    <td>{{ therapist.available_slots }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Recent Activity</h4>
+            <div>
+                <a href="{% url 'download_report' %}?source=recent_activities&format=pdf" 
+                   class="btn btn-sm btn-outline-danger me-2" title="Download PDF">
+                    <i class="fas fa-file-pdf">PDF</i>
+                </a>
+                <a href="{% url 'download_report' %}?source=recent_activities&format=excel" 
+                   class="btn btn-sm btn-outline-success" title="Download Excel">
+                    <i class="fas fa-file-excel">EXCEL</i>
+                </a>
+            </div>
+            <div>
+                <form method="get" action="{% url 'admin_dashboard' %}" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request.GET.search }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="recentActivityTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">Appointments</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="registrations-tab" data-bs-toggle="tab" data-bs-target="#registrations" type="button" role="tab">New Registrations</button>
+                </li>
+            </ul>
+            
+            <!-- Filter Section -->
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <form method="get" action="{% url 'admin_dashboard' %}">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="date_from" class="form-label">From Date</label>
+                                <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="date_to" class="form-label">To Date</label>
+                                <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="status" class="form-label">Status (Appointments)</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                    <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="role" class="form-label">Role (Registrations)</label>
+                                <select name="role" id="role" class="form-select">
+                                    <option value="">All Roles</option>
+                                    <option value="patient" {% if request.GET.role == 'patient' %}selected{% endif %}>Patient</option>
+                                    <option value="therapist" {% if request.GET.role == 'therapist' %}selected{% endif %}>Therapist</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear Filters
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="recentActivityContent">
+                <div class="tab-pane fade show active" id="appointments" role="tabpanel">
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date <a href="?appointments_page=1&sort=date&order={% if request.GET.sort == 'date' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    <i class="fas fa-sort"></i>
+                                </a></th>
+                                <th>Patient</th>
+                                <th>Therapist</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in recent_appointments %}
+                            <tr>
+                                <td>{{ appointment.date|date:"M d, Y"  }}</td>
+                                <td>{{ appointment.patient.get_full_name }}</td>
+                                <td>{{ appointment.therapist.user.get_full_name}}</td>
+                                <td>{{ appointment.status }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4">No appointments found matching your criteria</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    {% if recent_appointments.has_other_pages %}
+                    <nav aria-label="Appointments pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if appointments.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?appointments_page={{ appointments.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in appointments.paginator.page_range %}
+                            {% if appointments.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?appointments_page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">{{ i }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if appointments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?appointments_page={{ recent_appointments.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+                
+                <div class="tab-pane fade" id="registrations" role="tabpanel">
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Date <a href="?registrations_page=1&sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+                                    <i class="fas fa-sort"></i>
+                                </a></th>
+                                <th>User</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for signup in recent_signups %}
+                            <tr>
+                                <td>{{ signup.date_joined|date:"Y-m-d" }}</td>
+                                <td>{{ signup.get_full_name }}</td>
+                                <td>{{ signup.get_role_display }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">No registrations found matching your criteria</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    {% if recent_signups.has_other_pages %}
+                    <nav aria-label="Registrations pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if recent_signups.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?registrations_page={{ recent_signups.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in recent_signups.paginator.page_range %}
+                            {% if recent_signups.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?registrations_page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">{{ i }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if recent_signups.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?registrations_page={{ recent_signups.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .chart-container {
+    position: relative;
+    height: 300px;  /* Fixed height works better */
+    width: 100%;
+}
+
+#registrationChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('registrationChart');
+    if (ctx && '{{ user_signups|safe }}'.length > 2) {
+        try {
+            const userData = JSON.parse('{{ user_signups|safe }}');
+            
+            // Format dates better
+            const formattedLabels = userData.map(entry => {
+                const date = new Date(entry.day);
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            });
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: formattedLabels,
+                    datasets: [{
+                        label: 'New Users',
+                        data: userData.map(entry => entry.count),
+                        backgroundColor: 'rgba(103, 58, 183, 0.1)',  // Purple gradient
+                        borderColor: '#673ab7',
+                        borderWidth: 2,
+                        tension: 0.3,  // Smoother line
+                        pointBackgroundColor: '#673ab7',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true  // Adds background fill
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                precision: 0 
+                            },
+                            grid: { 
+                                color: 'rgba(0,0,0,0.05)' 
+                            }
+                        },
+                        x: {
+                            grid: { 
+                                display: false 
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Chart error:', error);
+            ctx.insertAdjacentHTML('afterend', 
+                '<div class="alert alert-danger">Error loading chart</div>');
+        }
+    }
+});
+</script>
+{% endblock %}

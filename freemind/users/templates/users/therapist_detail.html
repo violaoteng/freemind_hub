@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>{{ therapist.user.get_full_name|default:therapist.user.username }}</h2>
+                <span class="badge bg-{% if therapist.available %}success{% else %}secondary{% endif %}">
+                    {{ therapist.available|yesno:"Available,Unavailable" }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Profile picture would go here -->
+                    <div class="mb-3">
+                        <strong>Specializations:</strong>
+                        <div>
+                            {% for spec in therapist.specializations.all %}
+                            <span class="badge bg-info text-dark me-1">{{ spec.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Language:</strong> {{ therapist.language }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Gender:</strong> {{ therapist.get_gender_display }}
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <strong>About:</strong>
+                        <p>{{ therapist.bio|default:"No bio provided" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Qualifications:</strong>
+                        <p>{{ therapist.qualifications|default:"No qualifications provided" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'therapist_list' %}" class="btn btn-secondary">
+                Back to list
+            </a>
+          
+        </div>
+    </div>
+</div>
+{% endblock %}

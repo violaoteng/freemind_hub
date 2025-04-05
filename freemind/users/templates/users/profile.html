@@ -1,0 +1,247 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header text-white" style="background-color: #970747;">
+                    <h3 class="mb-0">My Profile</h3>
+                </div>
+
+                <!-- Display Messages -->
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+      {% for message in messages %}
+        <p class="mb-0">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Profile Picture Upload -->
+                        <div class="mb-4 text-center">
+                            <div class="position-relative d-inline-block">
+                                <div class="profile-picture-container">
+                                    <img src="{% if profile.image %}{{ profile.image.url }}{% else %}{{ MEDIA_URL }}default.jpg{% endif %}" 
+                                         alt="Profile Picture" 
+                                         class="rounded-circle profile-img img-thumbnail">
+                                    <label for="id_image" class="profile-upload-btn">
+                                        <i class="fas fa-camera"></i>
+                                        <input type="file" name="image" accept="image/*" 
+                                               class="d-none" id="id_image">
+                                    </label>
+                                </div>
+                            </div>
+                            {% if form.image.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.image.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- File Upload Section -->
+                        <div class="mb-3">
+                            <label class="form-label">Upload Document</label>
+                            <input type="file" name="uploaded_file" class="form-control">
+                        </div>
+
+                        <!-- Basic User Info -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ request.user.username }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control" value="{{ request.user.email }}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" name="phone" class="form-control {% if form.phone.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.phone.value|default_if_none:'' }}">
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.phone.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Gender</label>
+                                <select name="gender" class="form-control {% if form.gender.errors %}is-invalid{% endif %}">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male" {% if form.gender.value == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if form.gender.value == 'Female' %}selected{% endif %}>Female</option>
+                                </select>
+                                {% if form.gender.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.gender.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Personal Details -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" name="dob" class="form-control {% if form.dob.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.dob.value|date:'Y-m-d' }}" readonly>
+                                {% if form.dob.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.dob.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">County</label>
+                                <input type="text" name="county" class="form-control {% if form.county.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.county.value|default_if_none:'' }}">
+                                {% if form.county.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.county.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Preferences -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Language</label>
+                                <select name="language" class="form-control {% if form.language.errors %}is-invalid{% endif %}">
+                                    <option value="">Select Language</option>
+                                    <option value="English" {% if form.language.value == 'English' %}selected{% endif %}>English</option>
+                                    <option value="Swahili" {% if form.language.value == 'Swahili' %}selected{% endif %}>Swahili</option>
+                                    <option value="English, Swahili" {% if form.language.value == 'English, Swahili' %}selected{% endif %}>Both English & Swahili</option>
+                                </select>
+                                {% if form.language.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.language.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Preferred Therapist Gender</label>
+                                <select name="preferred_gender" class="form-control {% if form.preferred_gender.errors %}is-invalid{% endif %}">
+                                    <option value="">No Preference</option>
+                                    <option value="Male" {% if form.preferred_gender.value == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if form.preferred_gender.value == 'Female' %}selected{% endif %}>Female</option>
+                                </select readonly>
+                                {% if form.preferred_gender.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.preferred_gender.errors|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Specializations -->
+                        <div class="mb-3">
+                            <label class="form-label">Specializations</label>
+                            <div class="form-control bg-light">
+                                {% if profile.specializations.all %}
+                                    {% for spec in profile.specializations.all %}
+                                        <span class="badge bg-secondary">{{ spec.name }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No specializations selected</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+
+                    <!-- Assigned Therapist Section -->
+                    {% if profile.assigned_therapist %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h5>Your Assigned Therapist</h5>
+                        <div class="card mt-2">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ profile.assigned_therapist.user.get_full_name }}</h6>
+                                <p class="card-text">
+                                    Specializations: 
+                                    {% for spec in profile.assigned_therapist.specializations.all %}
+                                        <span class="badge bg-secondary">{{ spec.name }}</span>
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+    .profile-picture-container {
+        position: relative;
+        display: inline-block;
+    }
+    .profile-upload-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #970747;
+        color: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid white;
+        transition: all 0.3s ease;
+    }
+    .profile-upload-btn:hover {
+        background: #7a0639;
+        transform: scale(1.1);
+    }
+    .profile-upload-btn i {
+        font-size: 16px;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+    }
+    .badge {
+        margin-right: 5px;
+    }
+</style>
+
+<script>
+    // Preview image before upload
+    document.getElementById('id_image').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.querySelector('.profile-picture-container img');
+                if (img) {
+                    img.src = e.target.result;
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

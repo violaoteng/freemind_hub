@@ -1,0 +1,160 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Therapist Directory</h2>
+        {% if request.user.is_staff %}
+        <a href="{% url 'add_therapist' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Therapist
+        </a>
+        {% endif %}
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Search and Filter Form -->
+            <form method="get" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Search by name..." 
+                               value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="specialization" class="form-select">
+                            <option value="">All Specializations</option>
+                            {% for spec in specializations %}
+                            <option value="{{ spec }}" {% if request.GET.specialization == spec %}selected{% endif %}>
+                                {{ spec }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="language" class="form-select">
+                            <option value="">All Languages</option>
+                            {% for lang in languages %}
+                            <option value="{{ lang }}" {% if request.GET.language == lang %}selected{% endif %}>
+                                {{ lang }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="available" class="form-select">
+                            <option value="">All Availability</option>
+                            <option value="true" {% if request.GET.available == 'true' %}selected{% endif %}>Available</option>
+                            <option value="false" {% if request.GET.available == 'false' %}selected{% endif %}>Unavailable</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <a href="{% url 'therapist_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sync-alt"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Therapists Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Specialization</th>
+                            <th>Language</th>
+                            <th>Gender</th>
+                            <th>Available</th>
+                            <th>Profile</th>  <!-- Changed from "Actions" -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for therapist in therapists %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'therapist_detail' therapist.id %}" class="text-decoration-none">
+                                    {{ therapist.user.get_full_name|default:therapist.user.username }}
+                                </a>
+                            </td>
+                            <td>
+                                {% for spec in therapist.specializations.all %}
+                                <span class="badge bg-info text-dark me-1">{{ spec.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ therapist.language }}</td>
+                            <td>{{ therapist.get_gender_display }}</td>
+                            <td>
+                                <span class="badge bg-{% if therapist.available %}success{% else %}secondary{% endif %}">
+                                    {{ therapist.available|yesno:"Available,Unavailable" }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'therapist_detail' therapist.id %}" class="btn btn-sm btn-outline-primary" title="View Profile">
+                                    <i class="fas fa-user"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="text-muted">No therapists found.</div>
+                                {% if request.GET %}
+                                <a href="{% url 'therapist_list' %}" class="btn btn-link">Clear filters</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Pagination -->
+            {% if therapists.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if therapists.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ therapists.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for i in therapists.paginator.page_range %}
+                        {% if therapists.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% elif i > therapists.number|add:'-3' and i < therapists.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if therapists.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ therapists.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ therapists.paginator.num_pages }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

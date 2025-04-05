@@ -1,0 +1,24 @@
+
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Specializations</h2>
+
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="input-group">
+        <input type="text" name="name" class="form-control" 
+               placeholder="Add new specialization..." required>
+        <button class="btn btn-primary" type="submit">Add</button>
+    </div>
+</form>
+
+<ul class="list-group">
+    {% for spec in specializations %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ spec.name }}
+        <small class="text-muted">{{ spec.created_at|date:"M d, Y" }}</small>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
