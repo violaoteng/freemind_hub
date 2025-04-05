@@ -1,0 +1,169 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header text-white" style="background-color: #970747;">
+                    <h3 class="mb-0">Therapist Profile</h3>
+                </div>
+                <!-- Display Messages -->
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+      {% for message in messages %}
+        <p class="mb-0">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Profile Picture Upload -->
+                        <div class="mb-4 text-center">
+                            <div class="position-relative d-inline-block">
+                                <div class="profile-picture-container">
+                                    <img src="{% if therapist.image %}{{ therapist.image.url }}{% else %}{{ MEDIA_URL }}default.jpg{% endif %}" 
+                                         alt="Profile Picture" 
+                                         class="rounded-circle profile-img img-thumbnail">
+                                    <label for="id_profile_picture" class="profile-upload-btn">
+                                        <i class="fas fa-camera"></i>
+                                        <input type="file" name="profile_picture" accept="image/*" 
+                                               class="d-none" id="id_profile_picture">
+                                    </label>
+                                </div>
+                            </div>
+                            {% if form.profile_picture.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.profile_picture.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Basic Info -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" value="{{ therapist.user.get_full_name }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control" value="{{ therapist.user.email }}" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Professional Info -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.qualifications.label_tag }}
+                                {{ form.qualifications }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.experience_years.label_tag }}
+                                {{ form.experience_years }}
+                            </div>
+                        </div>
+
+                       
+                        <!-- Specializations -->
+                        <div class="mb-3">
+                            <label class="form-label">Specializations</label>
+                            <div class="form-control bg-light">
+                                {% if therapist.specializations.all %}
+                                    {% for spec in therapist.specializations.all %}
+                                        <span class="badge bg-secondary">{{ spec.name }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No specializations selected</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                {{ form.language.label_tag }}
+                                {{ form.language }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.gender.label_tag }}
+                                {{ form.gender }}
+                            </div>
+                        </div>
+
+                        <!-- Availability -->
+                        <div class="mb-3 form-check form-switch">
+                            {{ form.available.label_tag }}
+                            {{ form.available }}
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="mb-3">
+                            {{ form.bio.label_tag }}
+                            {{ form.bio }}
+                        </div>
+
+                        <!-- License Info -->
+                        <div class="mb-3">
+                            {{ form.license_number.label_tag }}
+                            {{ form.license_number }}
+                        </div >
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+    .profile-picture-container {
+        position: relative;
+        display: inline-block;
+    }
+    .profile-upload-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #970747;
+        color: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid white;
+    }
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+    }
+</style>
+
+<script>
+    document.getElementById('id_profile_picture').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.querySelector('.profile-picture-container img');
+                if (img) {
+                    img.src = e.target.result;
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

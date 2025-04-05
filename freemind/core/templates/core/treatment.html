@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Personalized Treatment</h1>
+        <p class="lead">Discover the best treatment plans tailored to your mental health needs.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Depression & Anxiety -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-lg border-0">
+                <img src="{% static 'img/depression.jpg' %}" class="card-img-top" alt="Depression & Anxiety">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Depression & Anxiety</h5>
+                    <p class="card-text flex-grow-1">Therapies: CBT, Mindfulness, Interpersonal Therapy.</p>
+                    <a href="{% url 'treatment_view' %}" class="btn btn-primary mt-auto">Start Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADHD -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-lg border-0">
+                <img src="{% static 'img/adhd-treatment.jpg' %}" class="card-img-top" alt="ADHD Treatment">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">ADHD Treatment</h5>
+                    <p class="card-text flex-grow-1">Medications: Stimulants (Ritalin, Adderall), Non-Stimulants.</p>
+                    <a href="{% url 'treatment_view' %}" class="btn btn-primary mt-auto">Start Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insomnia -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-lg border-0">
+                <img src="{% static 'img/insomnia.jpg' %}" class="card-img-top" alt="Insomnia Treatment">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Insomnia Treatment</h5>
+                    <p class="card-text flex-grow-1">Therapy: Cognitive Behavioral Therapy for Insomnia (CBT-I).</p>
+                    <a href="{% url 'treatment_view' %}" class="btn btn-primary mt-auto">Start Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Postpartum Depression & Anxiety -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-lg border-0">
+                <img src="{% static 'img/postpartum.jpg' %}" class="card-img-top" alt="Postpartum Depression & Anxiety">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Postpartum Depression</h5>
+                    <p class="card-text flex-grow-1">Medications: SSRIs (Zoloft, Prozac) – Safe for breastfeeding.</p>
+                    <a href="{% url 'treatment_view' %}" class="btn btn-primary mt-auto">Start Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

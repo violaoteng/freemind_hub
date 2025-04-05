@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Medications</h1>
+        <p class="lead">Learn about medications that can support your mental well-being.</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <!-- SSRIs -->
+        <div class="col-md-4 col-sm-6">
+            <div class="service-item rounded shadow-lg">
+                <div class="service-img rounded-top">
+                    <img src="{% static 'img/ssri.jpg' %}" class="img-fluid rounded-top w-100" alt="SSRIs">
+                </div>
+                <div class="service-content rounded-bottom bg-light p-4">
+                    <h5 class="mb-3">Selective Serotonin Reuptake Inhibitors (SSRIs)</h5>
+                    <p><strong>Examples:</strong> Prozac, Zoloft, Lexapro, Paxil, Celexa.</p>
+                    <p><strong>Uses:</strong> Depression, anxiety, OCD, PTSD, panic disorder.</p>
+                    <p><strong>Side Effects:</strong> Nausea, weight changes, insomnia, sexual dysfunction.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SNRIs -->
+        <div class="col-md-4 col-sm-6">
+            <div class="service-item rounded shadow-lg">
+                <div class="service-img rounded-top">
+                    <img src="{% static 'img/snri.jpg' %}" class="img-fluid rounded-top w-100" alt="SNRIs">
+                </div>
+                <div class="service-content rounded-bottom bg-light p-4">
+                    <h5 class="mb-3">Serotonin-Norepinephrine Reuptake Inhibitors (SNRIs)</h5>
+                    <p><strong>Examples:</strong> Cymbalta, Effexor XR, Pristiq, Fetzima.</p>
+                    <p><strong>Uses:</strong> Depression, anxiety, chronic pain, fibromyalgia.</p>
+                    <p><strong>Side Effects:</strong> High blood pressure, dizziness, fatigue.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stimulants & Non-Stimulants -->
+        <div class="col-md-4 col-sm-6">
+            <div class="service-item rounded shadow-lg">
+                <div class="service-img rounded-top">
+                    <img src="{% static 'img/adhd.jpg' %}" class="img-fluid rounded-top w-100" alt="ADHD Medications">
+                </div>
+                <div class="service-content rounded-bottom bg-light p-4">
+                    <h5 class="mb-3">ADHD Medications</h5>
+                    <p><strong>Stimulants:</strong> Ritalin, Adderall, Vyvanse.</p>
+                    <p><strong>Non-Stimulants:</strong> Strattera, Intuniv, Kapvay.</p>
+                    <p><strong>Uses:</strong> ADHD, focus improvement.</p>
+                    <p><strong>Side Effects:</strong> Insomnia, appetite changes, heart rate increase.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

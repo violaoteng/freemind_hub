@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Password Reset Successful</h2>
+  <p>Your password has been reset successfully. You can now log in.</p>
+  <a href="{% url 'login_view' %}" class="btn btn-primary">Go to Login</a>
+</div>
+{% endblock %}

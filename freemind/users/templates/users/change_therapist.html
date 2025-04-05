@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2>Change Therapist</h2>
+    <p>Are you sure you want to change your therapist? You can update your preferences below.</p>
+
+    <form method="post">
+        {% csrf_token %}     
+        <div class="mb-3">
+            <label class="form-label">Therapist Specialization</label>
+            <div>
+                {% for spec in specializations %}
+                     <input type="checkbox" name="specialization" value="{{ spec.id }}">"> {{ spec.name }}<br>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="preferred_language" class="form-label">Preferred Language</label>
+            <select class="form-select" id="preferred_language" name="preferred_language" required>
+                <option value="" disabled selected>Select your preferred language</option>
+                <option value="Swahili">Swahili</option>
+                <option value="English">English</option>
+                <option value="English Swahili">English, Swahili</option>
+            </select>
+        </div>
+       <!-- Preferred Gender -->
+       <div class="mb-3">
+        <label for="preferred_gender" class="form-label">Preferred Therapist Gender</label>
+        <select class="form-select" id="preferred_gender" name="preferred_gender">
+            <option value="" disabled selected>Select therapist preference</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+    </div>
+
+
+        <button type="submit" class="btn btn-warning">Yes, Change Therapist</button>
+        <a href="{% url 'patient_dashboard' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+{% endblock %}

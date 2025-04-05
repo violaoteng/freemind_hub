@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h3>Your Appointments</h3>
+
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <!-- Status Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'upcoming' %}active{% endif %}" style="color: #970747;"
+               href="?status=upcoming">Upcoming</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'today' %}active{% endif %}" style="color: #970747;"
+               href="?status=today">Today</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'past' %}active{% endif %}" style="color: #970747;"
+               href="?status=past">Completed</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'cancelled' %}active{% endif %}" style="color: #970747;"
+               href="?status=cancelled">Cancelled</a>
+        </li>
+    </ul>
+  
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+    
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.patient.username }}</td>
+                <td>{{ appointment.date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="badge 
+                        {% if appointment.status == 'Completed' %}bg-success
+                        {% elif appointment.status == 'Cancelled' %}bg-danger
+                        {% elif appointment.status == 'Confirmed' %}bg-primary
+                        {% elif appointment.status == 'Reschedule' %}bg-info
+                        {% else %}bg-warning text-dark{% endif %}">
+                        {{ appointment.status }}
+                    </span>
+                </td>
+                <td>
+                    {% if appointment.status == 'Pending' %}
+                        <a href="{% url 'confirm_appointment' appointment.id %}" 
+                           class="btn btn-sm btn-success">Confirm</a>
+                        <a href="{% url 'cancel_appointment' appointment.id %}" 
+                           class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>
+                    {% elif appointment.status == 'Confirmed' %}
+                        <a href="{% url 'complete_appointment' appointment.id %}" 
+                           class="btn btn-sm btn-success">Mark Complete</a>
+                        <a href="{% url 'cancel_appointment' appointment.id %}" 
+                           class="btn btn-sm btn-danger">Cancel</a>
+                        
+                        {# Join Session Button - Simplified version that matches view logic #}
+                        {% now "Y-m-d" as current_date %}
+                        {% if appointment.date|date:"Y-m-d" == current_date %}
+                            <a href="{% url 'jitsi_meet_view' appointment.id %}" 
+                               class="btn btn-sm btn-primary mt-1">Join Session</a>
+                        {% else %}
+                            <span class="text-muted">Available on {{ appointment.date|date:"F j, Y H:i" }}</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No appointments found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

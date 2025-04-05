@@ -1,0 +1,817 @@
+
+.fixed-top .container {
+    transition: 0.5s;
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.85); /* Slight transparency to blend with background */
+    color: #970747; /* Dark pink */
+    transition: 0.3s;
+}
+
+.navbar:hover {
+    background: white; /* Solid white on hover */
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #970747 !important;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #970747 !important;
+    transition: color 0.3s ease;
+}
+
+.navbar .nav-link:hover {
+    color: rgb(102, 2, 19)
+}
+.therapist-link {
+    background-color: #ff88cc !important;
+    color: white;
+    text-align: center;
+    border: none;
+    padding: 1px 8px;  /* Adjust vertical padding */
+    margin: 5px 0;      /* Add some margin to prevent full height */
+    border-radius: 7px; /* Optional: Rounded corners */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.text-pink {
+    color: rgb(126, 9, 28);
+}
+/* Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), 
+                url("../img/chat.jpg") no-repeat center center/cover;
+    background-size: cover;
+    color: #970747;
+    margin: 0;
+}
+
+.section-title {
+    color: white; /* Ensures text stands out on darker background */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+.main-content {
+    background: linear-gradient(rgba(128, 128, 128, 0.5), rgba(128, 128, 128, 0.5)), 
+    url("../img/chat.jpg") no-repeat center center/cover;
+    min-height: 100vh;
+    padding: 50px 0;
+    color: white; /* Ensures text stands out */
+}
+.sticky-top.navbar-light {
+    position: fixed;
+    width: 100%; /* Ensure full width */
+    top: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.9) !important; /* Add slight transparency */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow to separate from content */
+    z-index: 1000; /* Ensures it stays above other elements */
+    padding: 10px 0; /* Adjust padding */
+}
+
+.sticky-top.navbar-light .navbar-nav .nav-link {
+    padding: 10px 15px; /* Reduces vertical padding to keep the navbar compact */
+}
+
+
+.dropdown-menu .dropdown-item {
+    font-size: 1.1rem;
+    color: #970747;
+}
+
+.dropdown .dropdown-menu a:hover {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+
+.therapist-link:hover {
+    background-color: #cc6699 !important;
+    color: white;
+}
+/* Universal Styling */
+:root {
+    --primary-pink: #ff66b2;
+    --dark-pink: #970747;
+    --light-pink: #ff88cc;
+    --white: #ffffff;
+}
+
+
+.list-group-horizontal {
+    flex-direction: row;
+}
+.list-group-horizontal .list-group-item {
+    margin-bottom: 0;
+    margin-right: 5px;
+}
+.list-group-horizontal .list-group-item:first-child {
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 4px;
+}
+.list-group-horizontal .list-group-item:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 0;
+    margin-right: 0;
+}
+
+
+
+/* Common Section Styling */
+.section-title {
+    max-width: 900px;
+    text-align: center;
+    margin: 0 auto;
+    color: #ffffff;
+}
+
+.section-title .sub-title {
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+/* Shared Card Style */
+.custom-card {
+    position: relative;
+    border: 1px solid var(--primary-pink);
+    border-radius: 10px;
+    background: var(--white);
+    transition: 0.5s;
+}
+
+.custom-card:hover {
+    background: var(--primary-pink);
+    color: var(--white);
+}
+
+/* Image Hover Effects */
+.img-hover img {
+    transition: transform 0.5s;
+}
+
+.img-hover:hover img {
+    transform: scale(1.1);
+}
+
+/* Pink Buttons */
+.pink-btn {
+    background-color: var(--dark-pink);
+    color: var(--white);
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 12px 25px;
+    transition: background-color 0.3s ease, transform 0.3s;
+}
+
+.pink-btn:hover {
+    background-color: var(--primary-pink);
+    transform: scale(1.05);
+}
+.btn {
+    background-color: #ff69b4; /* Hot Pink */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 30px;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn:hover {
+    background-color: #ff1493; /* Deeper Pink */
+    transform: scale(1.05);
+}
+
+.btn-primary {
+    background-color: #ff69b4 !important;
+    border-color: #ff69b4 !important;
+}
+
+.btn-primary:hover {
+    background-color: #ff1493 !important;
+    border-color: #ff1493 !important;
+}
+
+.btn-success {
+    background-color: #ff85c2 !important;
+    border-color: #ff85c2 !important;
+}
+
+.btn-success:hover {
+    background-color: #ff4da6 !important;
+    border-color: #ff4da6 !important;
+}
+
+.btn-square {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.row {
+    display: flex;
+    flex-wrap: nowrap; 
+    overflow-x: hidden; 
+    gap: 16px; 
+    padding: 8px;
+    scroll-snap-type: x mandatory; /* Enable smooth snapping */
+    -webkit-overflow-scrolling: touch; 
+}
+
+.col {
+    flex: 1; /* Allow columns to grow and shrink */
+    min-width: 250px; /* Minimum width for each column */
+    max-width: 300px; /* Maximum width for each column */
+    display: flex; /* Make columns flex containers */
+    flex-direction: column; /* Stack content vertically */
+    background: #fff; /* Add background color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    scroll-snap-align: start;
+}
+
+.col:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Ensure all columns have equal height */
+.col > * {
+    flex: 1; /* Stretch children to fill the column height */
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+    .row {
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        overflow-x: visible; /* Disable horizontal scroll */
+    }
+
+    .col {
+        min-width: 100%; /* Full width on small screens */
+        max-width: 100%; /* Full width on small screens */
+    }
+}
+.btn-lg {
+    font-size: 18px;
+    padding: 12px 24px;
+}
+
+.btn-rounded {
+    border-radius: 50px;
+}
+.login-page {
+  background-color:#970747!important; /* Light blue background */
+  min-height: 100vh; /* Ensure it covers the full viewport height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-page .container {
+  background-color: white; /* Background color for the container */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.service .service-item {
+    box-shadow: 0 0 45px rgba(0, 0, 0, 0.2);
+    transition: transform 0.5s ease, box-shadow 0.5s ease; /* Add smooth transitions */
+    border-radius: 10px; /* Ensure rounded corners */
+    overflow: hidden; /* Ensure child elements respect the border radius */
+}
+
+.service .service-item:hover {
+    transform: translateY(-10px); /* Add a slight lift effect on hover */
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3); /* Enhance shadow on hover */
+}
+
+.service .service-item .service-img {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    border-top-left-radius: 10px; /* Match parent border radius */
+    border-top-right-radius: 10px; /* Match parent border radius */
+}
+
+.service .service-item .service-img img {
+    transition: transform 0.5s ease; /* Smooth image scaling */
+    width: 100%; /* Ensure image fills the container */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.service .service-item .service-img::before {
+    width: 100%;
+    height: 0;
+    position: absolute;
+    content: "";
+    top: 0;
+    left: 0;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    transition: height 0.5s ease; /* Smooth height transition */
+    z-index: 5;
+    background: rgba(21, 185, 217, 0.3); /* Semi-transparent overlay */
+}
+
+.service .service-item:hover .service-img::before {
+    height: 100%; /* Full overlay on hover */
+}
+
+.service .service-item .service-img:hover img {
+    transform: scale(1.2); /* Slightly larger scale for a zoom effect */
+}
+
+.service .service-item .service-content {
+    position: relative;
+    z-index: 2;
+    background: #fff; /* Ensure background color */
+    border-bottom-left-radius: 10px; /* Match parent border radius */
+    border-bottom-right-radius: 10px; /* Match parent border radius */
+    padding: 20px; /* Add padding for better spacing */
+}
+
+.service .service-item .service-content::before {
+    width: 100%;
+    height: 8px;
+    position: absolute;
+    content: "";
+    bottom: 0;
+    left: 0;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: rgba(21, 185, 217, 0.5);
+    transition: height 0.5s ease; /* Smooth height transition */
+    z-index: 3;
+}
+
+.service .service-item:hover .service-content::before {
+    height: 100%; /* Full overlay on hover */
+    background: rgba(21, 185, 217, 0.5); /* Consistent overlay color */
+}
+
+.service .service-item .service-content .service-content-inner {
+    transition: color 0.5s ease; /* Smooth text color transition */
+    position: relative;
+    z-index: 9;
+}
+
+.service .service-item:hover .service-content .service-content-inner {
+    color: var(--bs-white) !important; /* White text on hover */
+}
+
+.service .service-item:hover .service-content .service-content-inner h5 {
+    color: var(--bs-secondary); /* Secondary color for heading on hover */
+}
+
+/*** Additional Enhancements ***/
+
+/* Add a smooth fade-in effect for the content */
+.service .service-item .service-content .service-content-inner {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.service .service-item:hover .service-content .service-content-inner {
+    opacity: 1; /* Ensure full visibility on hover */
+}
+
+/* Add a gradient overlay for a more modern look */
+.service .service-item .service-img::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.service .service-item:hover .service-img::after {
+    opacity: 1; /* Show gradient overlay on hover */
+}
+
+/* Add a subtle border to the service item */
+.service .service-item {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.service .service-item:hover {
+    border-color: rgba(21, 185, 217, 0.5); /* Highlight border on hover */
+}
+
+
+/* Team, Feature, and Service Styling */
+.team-item, .feature-item, .service-item {
+    position: relative;
+    border: 1px solid var(--primary-pink);
+    border-radius: 12px; /* Increased for a smoother look */
+    background: var(--white);
+    transition: all 0.4s ease-in-out;
+    overflow: hidden; /* Prevents content overflow */
+}
+
+.team-item:hover h5, .feature-item:hover h5, .service-item:hover h5 {
+    color: var(--dark-pink);
+}
+
+/*** Team Section Start ***/
+.team .team-item .team-img {
+    position: relative;
+    overflow: hidden;
+    border-top-right-radius: 12px;
+    border-top-left-radius: 12px;
+}
+
+/* Smooth hover effect */
+.team .team-item .team-img::before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(21, 185, 217, 0); /* Transparent by default */
+    transition: background 0.4s ease-in-out;
+}
+
+.team .team-item:hover .team-img::before {
+    background: rgba(21, 185, 217, 0.3); /* Visible on hover */
+}
+
+/* Social icons animation */
+.team .team-item .team-img .team-icon {
+    position: absolute;
+    bottom: -125px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.4s ease-in-out;
+}
+
+.team .team-item .team-img:hover .team-icon {
+    bottom: 20px; /* Adjusted for a smoother animation */
+}
+
+/* Team content improvements */
+.team .team-item .team-content {
+    color: var(--bs-primary);
+    padding: 20px;
+    text-align: center;
+    transition: background 0.4s ease-in-out, color 0.4s ease-in-out;
+}
+
+/* Title hover color */
+.team .team-item .team-content h5 {
+    color: var(--bs-secondary);
+    font-size: 1.25rem;
+    transition: color 0.3s ease-in-out;
+}
+
+.team .team-item:hover .team-content h5 {
+    color: var(--bs-dark);
+}
+
+/* Background hover effect */
+.team .team-item:hover .team-content {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+    border-radius: 0 0 12px 12px; /* Matches the top border radius */
+}
+
+/*** Team Section End ***/
+
+/* Testimonial Background */
+.testimonial {
+    background: linear-gradient(rgba(21, 185, 217, 0.9), rgba(21, 185, 217, 0.9)), url(../img/carousel-1.jpg);
+    background-size: auto;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.testimonial .testimonial-item p {
+    color: var(--bs-dark);
+}   
+
+.testimonial .testimonial-item .testimonial-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    background: transparent;
+}
+
+.testimonial .testimonial-item .testimonial-inner .testimonial-inner-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 5px solid var(--bs-white);
+}
+
+.testimonial .testimonial-carousel.owl-carousel {
+    position: relative;
+}
+
+.testimonial .testimonial-carousel .owl-nav .owl-prev {
+    position: absolute;
+    top: 50%;
+    left: -20px;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: var(--bs-light);
+    color: var(--bs-primary);
+    transition: 0.5s;
+}
+
+.testimonial .testimonial-carousel .owl-nav .owl-next {
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: var(--bs-light);
+    color: var(--bs-primary);
+    transition: 0.5s;
+}
+
+
+.testimonial .testimonial-carousel .owl-nav .owl-prev:hover,
+.testimonial .testimonial-carousel .owl-nav .owl-next:hover {
+    box-shadow: inset 100px 0 0 0 var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+
+
+@media (max-width: 900px) {
+    .testimonial .testimonial-carousel .owl-nav .owl-prev {
+        margin-top: -190px;
+        margin-left: 40px;
+    }
+
+    .testimonial .testimonial-carousel .owl-nav .owl-next {
+        margin-top: -190px;
+        margin-right: 40px;
+    }
+    
+}
+
+.testimonial-carousel .owl-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.testimonial-carousel .owl-dots .owl-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 1px solid var(--bs-white);
+    background: transparent;
+    transition: 0.5s;
+}
+
+.testimonial-carousel .owl-dots .owl-dot.active {
+    width: 20px;
+    height: 20px;
+    background: var(--bs-secondary) !important;
+}
+
+.testimonial-carousel .owl-dots .owl-dot span {
+    position: relative;
+    margin-top: 50%;
+    margin-left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.testimonial-carousel .owl-dots .owl-dot span::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 1px;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--bs-white);
+}
+
+.testimonial .testimonial-carousel .testimonial-item .testimonial-inner p.fs-7 {
+    transition: 0.5s;
+}
+
+@media (min-width: 900px) {
+    .testimonial .testimonial-carousel .testimonial-item .testimonial-inner p.fs-7 {
+        font-size: 20px;
+    }
+}
+/* Testimonial Section Title Start */
+.testimonial .section-title {
+    max-width: 900px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.testimonial .section-title .sub-style {
+    position: relative;
+    display: inline-block;
+    text-transform: uppercase;
+    color: var(--bs-primary);
+}
+
+.testimonial .section-title .sub-style::before {
+    content: "";
+    width: 100px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    margin-top: 8px;
+    margin-left: -100px;
+    border: 1px solid var(--bs-white) !important;
+}
+
+.testimonial .section-title .sub-style::after {
+    content: "";
+    width: 50px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    margin-bottom: 5px;
+    margin-left: -50px;
+    border: 1px solid var(--bs-white) !important;
+}
+
+.testimonial .section-title .sub-title {
+    position: relative;
+    display: inline-block;
+    text-transform: uppercase;
+    color: var(--bs-primary);
+}
+
+.testimonial .section-title .sub-title::before {
+    content: "";
+    width: 100px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    margin-top: 8px;
+    margin-right: -100px;
+    border: 1px solid var(--bs-white) !important;
+}
+
+.testimonial .section-title .sub-title::after {
+    content: "";
+    width: 50px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    margin-bottom: 8px;
+    margin-right: -50px;
+    border: 1px solid var(--bs-white) !important;
+}
+
+/* Team Hover Effects */
+.team-item:hover .team-content {
+    background: var(--primary-pink);
+    color: var(--white);
+}
+
+/* Universal Carousel Styling */
+.carousel-caption {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.header-carousel .header-carousel-item img {
+    width: 100%;
+    height: 700px;
+    object-fit: cover;
+}
+
+.footer {
+    background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url("../img/carousel-2.jpg");
+    background-size: cover;
+    color: white;
+    padding: 50px 0;
+    margin-top: auto;
+}
+
+.footer a {
+    color: white; /* Ensures readability */
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: #ff66b2; /* Lighter pink hover effect */
+}
+.back-to-top {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    background: #970747;
+    color: white;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.back-to-top:hover {
+    background: #ff66b2;
+    color: white;
+}
+.footer {
+    width: 100vw;
+    background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url(../img/carousel-2.jpg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: white;
+    margin: none;
+    margin: 50;
+}
+.footer a {
+    color: white; /* Ensure readability */
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: #ff66b2; /* Lighter pink hover effect */
+}
+
+/* Adjust Footer Items for Consistency */
+.footer .footer-item a {
+    line-height: 35px;
+    transition: 0.5s;
+}
+
+.footer .footer-item p {
+    line-height: 35px;
+}
+
+/* Hover Effect */
+.footer .footer-item a:hover {
+    letter-spacing: 2px;
+    color: #ff3385; /* Slightly darker pink */
+}
+
+#statusPieChart {
+  width: 100% !important;
+  height: 200px !important;
+}
+
+/* Add to your CSS */
+canvas {
+    min-height: 200px;
+    width: 100% !important;
+    height: auto !important;
+}

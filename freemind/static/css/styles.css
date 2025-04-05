@@ -1,0 +1,72 @@
+/* styles.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color:#ff85c2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    color: #ff85c2; /* Red Mahogany color */
+}
+
+form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="date"],
+select,
+button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #800000; /* Red Mahogany color */
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    background-color: #a52a2a; /* Darker shade of red mahogany */
+}
+
+.message {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.message.success {
+    background-color:#3c763d ;
+    color: #3c763d;
+}
+
+.message.error {
+    background-color: #af0e0b ;
+    color: #f2dede;
+}  
+#about-us {
+    padding: 5rem 0;
+    background-color: #ff85c2; /* Light background */
+}
+/* Modern badge styling */

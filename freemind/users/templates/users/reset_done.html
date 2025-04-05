@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Check Your Email</h2>
+  <p>If an account exists with the email you provided, you will receive a password reset link shortly.</p>
+  <a href="{% url 'login_view' %}">Back to Login</a>
+</div>  
+{% endblock %}

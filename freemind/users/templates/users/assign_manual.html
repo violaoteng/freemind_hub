@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manual Assignment</h2>
+    <p>Assigning patient: <strong>{{ profile.user.username }}</strong></p>
+    
+    <form method="POST" action="{% url 'assign_manual' profile.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="therapist" class="form-label">Select Available Therapist:</label>
+            <select class="form-select" name="therapist" id="therapist" required>
+                <option value="">-- Select an Available Therapist --</option>
+                {% for therapist in therapists %}
+                <option value="{{ therapist.id }}">
+                    {{ therapist.user.get_full_name }} ({{ therapist.gender }}) 
+                    - Specializations: 
+                    {% if therapist.specializations.all %}
+                        {% for spec in therapist.specializations.all %}
+                            {{ spec.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        None
+                    {% endif %}
+                </option>
+                {% empty %}
+                <option value="" disabled>No available therapists found</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Assign Therapist</button>
+        <a href="{% url 'view_patients' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

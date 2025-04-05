@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid therapy-services py-5">
+    <div class="container">
+        <div class="section-title text-center mb-5">
+            <h1 class="display-4 mb-4">Therapy Services</h1>
+            <p class="lead">We offer personalized therapy for individuals, teens, and couples.</p>
+        </div>
+        <div class="row g-4">
+            <!-- Individual Therapy -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-lg border-0">
+                    <img src="{% static 'img/individual.jpg' %}" class="card-img-top rounded-top" alt="Individual Therapy">
+                    <div class="card-body text-center">
+                        <h3 class="card-title"><i class="fas fa-user"></i> Individual Therapy</h3>
+                        <p class="card-text">One-on-one sessions tailored to your needs. A safe space to explore thoughts and emotions.</p>
+                        <a href="{% url 'register' %}" class="btn btn-primary w-100 py-3">Start Your Therapy Today</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teen Therapy -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-lg border-0">
+                    <img src="{% static 'img/teen.jpg' %}" class="card-img-top rounded-top" alt="Teen Therapy">
+                    <div class="card-body text-center">
+                        <h3 class="card-title"><i class="fas fa-user-graduate"></i> Teen Therapy</h3>
+                        <p class="card-text">Support for teens navigating anxiety, depression, and school stress. Helping build resilience.</p>
+                        <a href="{% url 'register' %}" class="btn btn-primary w-100 py-3">Start Your Therapy Today</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Couple Therapy -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-lg border-0">
+                    <img src="{% static 'img/couple.jpg' %}" class="card-img-top rounded-top" alt="Couple Therapy">
+                    <div class="card-body text-center">
+                        <h3 class="card-title"><i class="fas fa-heart"></i> Couple Therapy</h3>
+                        <p class="card-text">Strengthen relationships with guided sessions. Improve communication and resolve conflicts.</p>
+                        <a href="{% url 'register' %}" class="btn btn-primary w-100 py-3">Start Your Therapy Today</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

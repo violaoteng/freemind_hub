@@ -1,0 +1,192 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="col-lg-6 col-md-8 col-sm-10">  
+    <h2 class="text-center mb-4">Add New Therapist</h2>
+
+    <!-- Display Messages -->
+    {% if messages %}
+      <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+          <p class="mb-0">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form id="therapistForm" method="post" action="{% url 'add_therapist' %}" novalidate>
+        {% csrf_token %}
+
+        <!-- Full Name -->
+        <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Full Names" 
+                required minlength="2" maxlength="30" pattern="[A-Za-z\s]+" 
+                title="Only letters and spaces allowed (2-30 characters).">
+            <div class="invalid-feedback">Only letters and spaces allowed (2-30 characters).</div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+            <div class="invalid-feedback">Enter a valid email (e.g., name@example.com).</div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" 
+                required minlength="8" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                title="At least 8 chars, 1 letter, 1 number, 1 special character.">
+            <div class="invalid-feedback">At least 8 characters, 1 letter, 1 number, and 1 special character.</div>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="0712345678" 
+                required pattern="^\d{10,15}$" title="Only numbers allowed (10-15 digits).">
+            <div class="invalid-feedback">Only numbers allowed (10-15 digits).</div>
+        </div>
+
+        <!-- Gender -->
+        <div class="mb-3">
+            <label class="form-label">Gender</label>
+            <div>
+                <input type="radio" id="male" name="gender" value="Male" required>
+                <label for="male">Male</label>
+            </div>
+            <div>
+                <input type="radio" id="female" name="gender" value="Female" required>
+                <label for="female">Female</label>
+            </div>
+            <div class="invalid-feedback">Please select a gender.</div>
+        </div>
+
+        <!-- Language -->
+        <div class="mb-3">
+            <label for="language" class="form-label">Language</label>
+            <select class="form-select" id="language" name="language" required>
+                <option value="" disabled selected>Select language</option>
+                <option value="Swahili">Swahili</option>
+                <option value="English">English</option>
+                <option value="English, Swahili">English & Swahili</option>
+            </select>
+            <div class="invalid-feedback">Please select a language.</div>
+        </div>
+
+       <!-- Specializations -->
+    <div class="mb-3">
+        <label class="form-label">Therapist Specialization</label>
+        <div>
+            {% for spec in specializations %}
+                <input type="checkbox" name="specializations" value="{{ spec.id }}"> {{ spec.name }}<br>
+            {% endfor %}
+        </div>
+    </div>
+
+        <!-- Availability -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="available" name="available" checked>
+            <label class="form-check-label" for="available">Currently available for new patients</label>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Add Therapist</button>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript for Real-Time Validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('therapistForm');
+    
+    const fullName = document.getElementById('full_name');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const password = document.getElementById('password');
+    const specializations = document.querySelectorAll('input[name="specializations"]');
+    const specContainer = document.getElementById('specializations-container');
+
+    // Full Name Validation (Only letters and spaces)
+    fullName.addEventListener('input', function () {
+        validateField(fullName, /^[A-Za-z\s]{2,30}$/);
+    });
+
+    // Email Validation
+    email.addEventListener('input', function () {
+        validateField(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    });
+
+    // Phone Number Validation
+    phone.addEventListener('input', function () {
+        validateField(phone, /^\d{10,15}$/);
+    });
+
+    // Password Validation
+    password.addEventListener('input', function () {
+        validateField(password, /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
+    });
+
+    // Specializations Validation
+    specContainer.addEventListener('change', function() {
+        const checkedSpecs = document.querySelectorAll('input[name="specializations"]:checked');
+        const isValid = checkedSpecs.length > 0;
+        specContainer.classList.toggle('is-invalid', !isValid);
+    });
+
+    // Helper function for real-time validation
+    function validateField(input, regex) {
+        input.setCustomValidity(regex.test(input.value) ? '' : 'Invalid field.');
+        input.classList.toggle('is-invalid', !regex.test(input.value));
+    }
+
+    // Prevent form submission if invalid
+    form.addEventListener('submit', function (event) {
+        // Check specializations
+        const checkedSpecs = document.querySelectorAll('input[name="specializations"]:checked');
+        if (checkedSpecs.length === 0) {
+            specContainer.classList.add('is-invalid');
+            event.preventDefault();
+            return;
+        }
+        
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+});
+</script>
+
+<style>
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    .is-invalid ~ .invalid-feedback,
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    #specializations-container.is-invalid {
+        border: 1px solid #dc3545;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+
+{% endblock %}

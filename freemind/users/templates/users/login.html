@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="login-page">
+  <div class="container mt-5 d-flex justify-content-center">
+    <div class="col-lg-6 col-md-8 col-sm-10">
+      <h2 class="text-center mb-4">Login</h2>
+  
+      <form method="post" action="{% url 'login_view' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <a href="{% url 'password_reset' %}" class="d-block mt-2">Forgot Password?</a>
+    </div>  
+  </div>
+</div>
+{% endblock %}
+ 
+
