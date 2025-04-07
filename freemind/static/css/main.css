@@ -51,7 +51,7 @@ body {
     background: linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), 
                 url("../img/chat.jpg") no-repeat center center/cover;
     background-size: cover;
-    color: #970747;
+    color:blue;
     margin: 0;
 }
 

@@ -11,9 +11,32 @@
         <p>You have not been assigned a therapist yet.</p>
     {% endif %}
 
+                <!-- Progress Tracker Section -->
+    <div class="mb-4">
+        <button onclick="openProgressTracker()" class="btn btn-primary" aria-label="Open progress tracker">
+            <i class="fas fa-chart-line" aria-hidden="true"></i> 
+            <span>View Progress Tracker</span>
+        </button>
+    </div>
+
+    <!-- Progress Tracker Modal -->
+    <div id="progressTrackerModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="progressModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="progressModalLabel">Your Progress</h5>
+                    <button type="button" class="btn-close" onclick="closeProgressTracker()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include 'progress_tracker/progress_tracker.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
     <ul>
         <li><a href="{% url 'book_appointment' %}">Book or view  Appointment</a></li>
         <li><a href="{% url 'change_therapist' %}">Change Therapist</a></li>
+
        
     </ul>  
 
@@ -23,12 +46,37 @@
        <li>
            {{ notification.message }}
            <small>({{ notification.created_at }})</small>
-           <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-sm btn-success mb-3">Mark as Read</a>
+           <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-sm btn-success mb-3"
+             aria-label="Mark notification as read">
+            Mark as Read
+        </a>
         </li>
         {% empty %}
         <li>No new notifications.</li>
         {% endfor %}
     </ul> 
-  
 </div>
+
+{% block extra_js %}
+<script>
+  function openProgressTracker() {
+    const modal = document.getElementById('progressTrackerModal');
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+  function closeProgressTracker() {
+    const modal = document.getElementById('progressTrackerModal');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+}
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('progressTrackerModal');
+        if (event.target === modal) {
+            closeProgressTracker();
+        }
+    }
+</script>
+{% endblock %}
 {% endblock %}

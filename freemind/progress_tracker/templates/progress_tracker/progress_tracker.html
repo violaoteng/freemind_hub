@@ -1,0 +1,143 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Mood Tracker -->
+  <div class="mood-tracker mb-4 p-3 border rounded">
+    <h4 id="moodHeading"><i class="fas fa-smile" aria-hidden="true"></i> Today's Mood</h4>
+    <div class="d-flex align-items-center mt-3">
+      <label for="moodSlider" class="visually-hidden">Mood level from 1 to 10</label>
+      <input type="range" class="form-range" id="moodSlider" min="1" max="10" value="5" 
+             aria-labelledby="moodHeading moodValue">
+      <span class="ms-3" id="moodValue">5</span>/10
+      <button class="btn btn-primary ms-3" onclick="logMood()" aria-label="Save mood rating">
+        <i class="fas fa-save" aria-hidden="true"></i> Save
+      </button>
+    </div>
+  </div>
+
+  <!-- PHQ-9 Survey - Dynamic with Accessibility -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 id="surveyTitle"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i> PHQ-9 Depression Survey</h3>
+    </div>
+    <div class="card-body">
+      <form id="phq9Form" aria-labelledby="surveyTitle">
+        <p class="text-muted">Over the last 2 weeks, how often have you been bothered by...</p>
+        
+        <div id="phq9Questions" class="mb-3" role="group" aria-labelledby="surveyTitle"></div>
+        
+        <button type="button" class="btn btn-success" onclick="submitPHQ9()" aria-label="Submit PHQ-9 survey">
+          <i class="bi bi-send-check" aria-hidden="true"></i> Submit Survey
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Progress Chart -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="bi bi-graph-up"></i> Your Progress</h3>
+    </div>
+    <div class="card-body">
+      <canvas id="progressChart" height="300" aria-label="Mental health progress chart"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Mood Tracker (unchanged)
+const moodSlider = document.getElementById('moodSlider');
+const moodValue = document.getElementById('moodValue');
+moodSlider.oninput = () => moodValue.textContent = moodSlider.value;
+
+// PHQ-9 Questions - Enhanced Dynamic Version
+const phq9Questions = [
+  "Little interest in doing things",
+  "Feeling down or hopeless",
+  "Trouble sleeping or sleeping too much",
+  "Feeling tired or having little energy",
+  "Poor appetite or overeating",
+  "Feeling bad about yourself",
+  "Trouble concentrating",
+  "Moving/speaking slowly or being fidgety",
+  "Thoughts of self-harm"
+];
+
+const phq9Container = document.getElementById('phq9Questions');
+phq9Questions.forEach((q, i) => {
+  const questionId = `phq9-q${i+1}`;
+  phq9Container.innerHTML += `
+    <div class="mb-3">
+      <label for="${questionId}" class="form-label">${i+1}. ${q}</label>
+      <select 
+        class="form-select" 
+        id="${questionId}" 
+        name="q${i+1}"
+        aria-required="true"
+        aria-describedby="help-${questionId}"
+      >
+        <option value="0">Not at all</option>
+        <option value="1">Several days</option>
+        <option value="2">More than half the days</option>
+        <option value="3">Nearly every day</option>
+      </select>
+      <small id="help-${questionId}" class="form-text text-muted">
+        Select how often you've experienced this
+      </small>
+    </div>
+  `;
+});
+
+// API Functions (unchanged)
+async function logMood() {
+  try {
+    const response = await fetch('/log_mood/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ mood: moodSlider.value })
+    });
+    const data = await response.json();
+    showToast('Mood saved successfully!');
+    updateChart();
+  } catch (error) {
+    console.error('Error saving mood:', error);
+    showToast('Failed to save mood', 'error');
+  }
+}
+
+async function submitPHQ9() {
+  try {
+    const responses = {};
+    phq9Questions.forEach((_, i) => {
+      responses[`q${i+1}`] = parseInt(document.getElementById(`phq9-q${i+1}`).value);
+    });
+    
+    const response = await fetch('/submit_phq9/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify(responses)
+    });
+    
+    const data = await response.json();
+    showToast(`PHQ-9 Score: ${data.score} (${getSeverity(data.score)})`);
+    updateChart();
+  } catch (error) {
+    console.error('Error submitting PHQ-9:', error);
+    showToast('Failed to submit survey', 'error');
+  }
+}
+
+// Rest of your code remains unchanged...
+</script>
+{% endblock %}

@@ -11,7 +11,8 @@
         <li>
           {{ notification.message }}
           <small>({{ notification.created_at }})</small>
-           <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-sm btn-success mb-3" >Mark as Read</a>
+          <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-sm btn-success mb-3"
+           aria-label="Mark notification as read">Mark as Read</a>
         </li>
       {% empty %}
            <li>No new notifications.</li>
