@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'chats',
     'resources',
     'reports',
+    'progress_tracker'
 
 
 ]
@@ -150,6 +151,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 
+JITSI_JWT_SECRET =  SECRET_KEY
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -160,9 +163,15 @@ LOGIN_URL = '/login_view/'
 
 SESSION_COOKIE_AGE = 3600
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 SESSION_FILE_PATH = '/tmp/django_sessions'
-
-
+SESSION_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 #celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

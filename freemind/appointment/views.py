@@ -13,6 +13,7 @@ from users.models import Therapist, Profile, Notification
 # appointment/views.py
 @login_required
 def book_appointment(request):
+    
     try:
         profile = Profile.objects.get(user=request.user)
         assigned_therapist = profile.assigned_therapist
@@ -31,9 +32,13 @@ def book_appointment(request):
             appointment.patient = request.user
             appointment.therapist = assigned_therapist
             appointment.status = 'Pending'
-
             appointment.date = form.cleaned_data['date']
             duration = form.cleaned_data['duration']
+
+            request.session['last_appointment'] = {
+                'date': appointment.date.isoformat(),
+                'duration': duration
+            }
 
             if timezone.is_naive(appointment.date):
                 appointment.date = timezone.make_aware(appointment.date)
@@ -41,6 +46,10 @@ def book_appointment(request):
             if appointment.date <= timezone.now() + timezone.timedelta(hours=24):
                 messages.error(request, "Appointments must be booked at least 24 hours in advance.")
                 return redirect('book_appointment')
+            
+        else:
+            initial_data = request.session.get('last_appointment', {})
+            form = AppointmentForm(therapist=assigned_therapist, initial=initial_data)    
 
             appointment_end_time = appointment.date + timezone.timedelta(minutes=duration)
 
@@ -142,6 +151,11 @@ def delete_availability(request, availability_id):
 def appointment_list(request):
     now = timezone.now()
     status_filter = request.GET.get('status', 'upcoming')
+
+    status_filter = request.GET.get('status', request.session.get('status_filter', 'upcoming'))
+    
+    # Save the filter to session
+    request.session['status_filter'] = status_filter
     
     # Base queryset with select_related for performance
     if request.user.role == 'patient':

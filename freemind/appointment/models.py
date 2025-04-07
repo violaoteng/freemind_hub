@@ -59,3 +59,4 @@ class TherapistAvailability(models.Model):
         """Soft delete the availability instead of removing it."""
         self.is_active = False
         self.save()
+        

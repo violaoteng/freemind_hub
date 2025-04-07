@@ -29,6 +29,7 @@ urlpatterns = [
     path('video/', include('video.urls')),
     path('resources/',include('resources.urls')),
     path('reports/', include('reports.urls')),
+    path('progress_tracker,', include('progress_tracker.urls')),
 ]
 
 if settings.DEBUG:
