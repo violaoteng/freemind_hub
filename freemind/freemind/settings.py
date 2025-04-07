@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-zjr66bg%*)iac+w&gf$3t(4$&!av_f@7&@0u!9nt4%cmhmi=np
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['freemind-hub.onrender.com']
 
 
 # Application definition
