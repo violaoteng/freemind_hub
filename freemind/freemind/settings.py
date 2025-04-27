@@ -42,6 +42,7 @@ JITSI_SUBJECT = JITSI_CONFIG['SUBJECT']
 DEBUG = True
 #TESTING = False
 
+
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 ALLOWED_HOSTS = ['127.0.0.1', 'freemind-hub.onrender.com']
