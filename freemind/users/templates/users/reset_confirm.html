@@ -12,7 +12,7 @@
     </form>
   {% else %}
     <p>The reset link is invalid or has expired. Please request a new reset.</p>
-    <a href="{% url 'password_reset' %}">Request New Password Reset</a>
+    <a href="{% url 'password_reset_complete' %}">Request New Password Reset</a>
   {% endif %}
 </div>  
 {% endblock %}

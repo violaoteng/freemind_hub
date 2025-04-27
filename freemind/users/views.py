@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect,  get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib import messages
-from django.db.models.functions import TruncDay, TruncWeek
+from django.db.models.functions import TruncDay
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Profile, Therapist, AssignedTherapist, Specialization, Notification
 from appointment.models import Appointment
@@ -9,18 +9,21 @@ from appointment.forms import ProfileForm, TherapistProfileForm
 from django.utils.text import slugify
 from django.conf import settings
 from django.db import transaction, IntegrityError
-from django.db. models import Count, Q, Avg
+from django.db. models import Count, Q
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
-from datetime import timedelta
 import json
-from datetime import date
+from datetime import datetime, date, timedelta
 from django.http import HttpResponse, JsonResponse
 from io import BytesIO
-from reportlab.pdfgen import canvas
 from openpyxl import Workbook
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+
 
 
 
@@ -37,17 +40,6 @@ def generate_unique_username(email):
         counter += 1
 
     return unique_username
-
-
-# Try to authenticate the user
-user = authenticate(username='therapist_email@example.com', password='therapist_password')
-if user is not None:
-    # Authentication was successful
-    print("User authenticated")
-else:
-    # Authentication failed
-    print("Invalid email or password")
-
 
 def register(request):
     if request.method == "POST":
@@ -76,6 +68,7 @@ def register(request):
         with transaction.atomic():
             user = User.objects.create_user(
                  username=unique_username, email=email, password=password1, role="patient",
+                 date_joined=timezone.now(),
                  first_name=full_name.split(" ")[0], last_name=" ".join(full_name.split(" ")[1:]) if len(full_name.split(" ")) > 1 else ""
         )
             user.first_name = full_name.split(" ")[0]
@@ -93,7 +86,13 @@ def register(request):
                 language=language
             )
             selected_specializations = Specialization.objects.filter(name__in=specializations)
-            profile.specializations.set(selected_specializations)  # Assign only selected ones
+            profile.specializations.set(selected_specializations)  
+
+             # Store intake preferences in session
+            request.session['preferred_language'] = language
+            request.session['preferred_gender'] = preferred_gender
+            request.session['specializations'] = specializations
+            request.session['intake_complete'] = True
 
         messages.success(request, "Registration successful! You can now log in.")
         return redirect("login_view")
@@ -125,11 +124,16 @@ def login_view(request):
 
             # Redirect based on role
             if user.role == "admin":
-                return redirect("admin_dashboard")
+                response = redirect("admin_dashboard")
             elif user.role == "therapist":
-                return redirect("therapist_dashboard")
+                response = redirect("therapist_dashboard")
             else:
-                return redirect("patient_dashboard")
+                response = redirect("patient_dashboard")
+
+            # Set user role in cookie
+            response.set_cookie('user_role', user.role, max_age=3600 * 24 * 7)
+            return response
+
 
         else:
             messages.error(request, "Invalid email or password.")
@@ -211,8 +215,10 @@ def admin_dashboard(request):
         )
     
     if date_from:
+        date_from = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
         appointments = appointments.filter(date__gte=date_from)
     if date_to:
+        date_to = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d'))
         appointments = appointments.filter(date__lte=date_to)
     if status:
         appointments = appointments.filter(status=status)
@@ -243,9 +249,11 @@ def admin_dashboard(request):
             Q(last_name__icontains=search_query)
         )
     if date_from:
-        registrations = registrations.filter(date_joined__gte=date_from)
+        date_from = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+        appointments = appointments.filter(date__gte=date_from)
     if date_to:
-        registrations = registrations.filter(date_joined__lte=date_to)
+        date_to = timezone.make_aware(datetime.strptime(date_to, '%Y-%m-%d'))
+        appointments = appointments.filter(date__lte=date_to)
     if role:
         registrations = registrations.filter(role=role)
     
@@ -285,7 +293,7 @@ def admin_dashboard(request):
 
         # User growth data for chart (last 30 days)
         today = timezone.now().date()
-        thirty_days_ago = today - timedelta(days=30)
+        thirty_days_ago = timezone.now().date() - timedelta(days=30)
         
         user_signups = User.objects.filter(
             date_joined__gte=thirty_days_ago
@@ -389,6 +397,113 @@ def view_patients(request):
         print(f"Error in view_patients: {str(e)}")
         return render(request, 'core/404.html', {'message': 'An error occurred while loading patient data.'})
     
+
+def generate_export(queryset, format_type):
+    try:
+        if format_type == 'pdf':
+            return generate_patient_pdf(queryset)
+        elif format_type == 'excel':
+            return generate_patient_excel(queryset)
+    except Exception as e:
+        print(f"Export error: {str(e)}")
+        return JsonResponse({'error': 'Failed to generate export'}, status=500)
+
+def generate_patient_pdf(queryset):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    elements.append(Paragraph("Patient Export Report", styles['Title']))
+    
+    # Prepare table data
+    table_data = [
+        ['Username', 'Email', 'Phone', 'Gender', 'County', 'Language', 'Preferred Therapist']
+    ]
+    
+    for patient in queryset[:1000]:  # Still limit to 1000 records
+        profile = getattr(patient, 'profile', None)
+        table_data.append([
+            patient.username,
+            patient.email,
+            getattr(profile, 'phone', 'N/A'),
+            getattr(profile, 'gender', 'N/A'),
+            getattr(profile, 'county', 'N/A'),
+            getattr(profile, 'language', 'N/A'),
+            getattr(profile, 'preferred_gender', 'N/A'),
+        ])
+    
+    # Create table with optimized column widths
+    col_widths = [80, 120, 80, 60, 80, 80, 100]  # Adjusted widths
+    table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    # Style the table
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 10),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#D9E1F2')),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('WORDWRAP', (0,0), (-1,-1), True),  # Enable text wrapping
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
+    
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="patients_export.pdf"'
+    return response
+
+def generate_patient_excel(queryset):
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="patients_export.xlsx"'
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Patients"
+    
+    # Headers
+    headers = ['Username', 'Email', 'Phone', 'Gender', 'Age', 'County', 'Language', 'Preferred Therapist']
+    ws.append(headers)
+    
+    # Data rows
+    for patient in queryset:
+        profile = getattr(patient, 'profile', None)
+        dob = getattr(profile, 'dob', None)
+        age = (timezone.now().date().year - dob.year) if (dob and isinstance(dob, date)) else ''
+        
+        ws.append([
+            patient.username,
+            patient.email,
+            getattr(profile, 'phone', ''),
+            getattr(profile, 'gender', ''),
+            age,
+            getattr(profile, 'county', ''),
+            getattr(profile, 'language', ''),
+            getattr(profile, 'preferred_gender', ''),
+        ])
+    
+    # Auto-size columns
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+    
+    wb.save(response)
+    return response    
+    
 @login_required
 @user_passes_test(is_admin)
 def assign_manual(request, profile_id):
@@ -436,89 +551,7 @@ def assign_manual(request, profile_id):
         messages.error(request, f"Error: {str(e)}")
         return redirect('view_patients')
     
-def generate_export(queryset, format_type):
-    try:
-        if format_type == 'pdf':
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="patients_export.pdf"'
-            
-            buffer = BytesIO()
-            p = canvas.Canvas(buffer)
-            
-            # PDF Header
-            p.setFont("Helvetica-Bold", 14)
-            p.drawString(100, 800, "Patient Export Report")
-            p.setFont("Helvetica", 10)
-            
-            # Column headers
-            headers = ['Username', 'Email', 'Phone', 'Gender', 'County', 'Language', 'Therapist Gender']
-            for i, header in enumerate(headers):
-                p.drawString(100 + i*120, 780, header)
-            
-            # Data rows
-            y = 760
-            for patient in queryset[:1000]:  # Limit to 1000 for PDF
-                profile = getattr(patient, 'profile', None)
-                row = [
-                    patient.username,
-                    patient.email,
-                    getattr(profile, 'phone', ''),
-                    getattr(profile, 'gender', ''),
-                    getattr(profile, 'county', ''),
-                    getattr(profile, 'language', ''),
-                    getattr(profile, 'preferred_gender', ''),
-                ]
-                for i, value in enumerate(row):
-                    p.drawString(100 + i*120, y, str(value))
-                y -= 20
-                if y < 50:  # New page
-                    p.showPage()
-                    y = 800
-                    for i, header in enumerate(headers):
-                        p.drawString(100 + i*120, 780, header)
-            
-            p.save()
-            pdf = buffer.getvalue()
-            buffer.close()
-            response.write(pdf)
-            return response
-            
-        elif format_type == 'excel':
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename="patients_export.xlsx"'
-            
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Patients"
-            
-            # Excel headers
-            headers = ['Username', 'Email', 'Phone', 'Gender', 'Age', 'County', 'Language', 'Therapist Gender']
-            ws.append(headers)
-            
-            # Data rows
-            for patient in queryset:
-                profile = getattr(patient, 'profile', None)
-                dob = getattr(profile, 'dob', None)
-                age = (date.today().year - dob.year) if dob else ''
-                
-                ws.append([
-                    patient.username,
-                    patient.email,
-                    getattr(profile, 'phone', ''),
-                    getattr(profile, 'gender', ''),
-                    age,
-                    getattr(profile, 'county', ''),
-                    getattr(profile, 'language', ''),
-                    getattr(profile, 'preferred_gender', ''),
 
-                ])
-            
-            wb.save(response)
-            return response
-            
-    except Exception as e:
-        print(f"Export error: {str(e)}")
-        return JsonResponse({'error': 'Failed to generate export'}, status=500)
 
 @login_required
 @user_passes_test(is_admin)
@@ -601,13 +634,13 @@ def manage_specializations(request):
 @user_passes_test(is_therapist)
 def therapist_dashboard(request):
     user = request.user
+    therapist = Therapist.objects.get(user=user)
 
     # Get all appointments for this therapist, not just pending ones
     appointments = Appointment.objects.filter(
-        therapist__user=user,
-        date__gte=timezone.now().date()     
-    ).order_by('date')
-    
+    therapist__user=user,
+    date__gte=timezone.now() 
+      ).order_by('date')
     # Get pending appointments count separately
     pending_count = Appointment.objects.filter(
         therapist__user=user,
@@ -615,12 +648,15 @@ def therapist_dashboard(request):
     ).count()
 
     notifications = Notification.objects.filter(user=user, read=False)
+
+    patients = Profile.objects.filter(assigned_therapist=therapist)
     
     context = {
         'user': user,
         'appointments': appointments,
         'pending_count': pending_count,
         'notifications': notifications,
+        'patients': patients,
     }
 
     return render(request, 'users/therapist_dashboard.html', context)
@@ -641,7 +677,7 @@ def therapist_list(request):
 def patient_dashboard(request):
     user = request.user
     profile = Profile.objects.get(user=user)
-    appointments = Appointment.objects.filter(patient=user).order_by('date')
+    appointments = Appointment.objects.filter(patient=user, date__gte=timezone.now()).order_by('date')
     assigned_therapist = profile.assigned_therapist
     notifications = Notification.objects.filter(user=user, read=False)  # Fetch unread notifications
 
@@ -678,7 +714,7 @@ def redirect_user(request):
         return redirect('therapist_dashboard')
     elif request.user.role == 'patient':
         return redirect('patient_dashboard')
-    return redirect('/')  # Default to home if role is undefined
+    return redirect('/')  
 
 def auto_match_therapist(patient):
     """Automatically assigns a therapist based on patient preferences, prioritizing best matches."""
@@ -824,24 +860,29 @@ def change_therapist(request):
             profile.preferred_gender = request.POST.get('preferred_gender')
         profile.save()
 
-        # Then find a new therapist based on updated preferences
+        # finds a new therapist based on updated preferences
         new_therapist = auto_match_therapist(profile)  
 
         if new_therapist:
-            # Update the profile with the new therapist
+            # Updates the profile with the new therapist
             profile.assigned_therapist = new_therapist
             profile.save()
             
             # Send email notification
             send_assignment_email(profile.user.email, new_therapist, reassigned=True)
 
-            # Update or create AssignedTherapist record
+            # Updates or creates AssignedTherapist record
             AssignedTherapist.objects.update_or_create(
                 patient=profile, 
                 defaults={'therapist': new_therapist, 'assigned_by': None}
             )
 
             messages.success(request, "Your therapist has been changed successfully!")
+
+            request.session.pop('preferred_language', None)
+            request.session.pop('preferred_gender', None)
+            request.session.pop('specializations', None)
+            request.session.pop('intake_complete', None)
             return redirect('book_appointment')
         else:
             messages.error(request, "No matching therapists are available at the moment.")

@@ -815,3 +815,26 @@ canvas {
     width: 100% !important;
     height: auto !important;
 }
+
+/* Smooth transitions */
+#surveySection, #dashboardSection {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Loading spinner */
+.spinner-border {
+    vertical-align: middle;
+}
+
+.toast {
+    z-index: 9999;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.modal-content {
+    position: relative;
+}
+
+

@@ -3,6 +3,9 @@ from .models import Appointment, TherapistAvailability
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from users.models import Profile, Therapist
+from chats.models import Message
+from resources.models import Resource
+
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
@@ -91,3 +94,27 @@ class TherapistProfileForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'rows': 4}),
             'qualifications': forms.Textarea(attrs={'rows': 4}),
         }            
+
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']
+        widgets = {
+            'content': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Type a message...'}),
+        }
+
+class ResourceUploadForm(forms.ModelForm):
+    class Meta:
+        model = Resource
+        fields = ['title', 'description', 'categories', 'file', 'link', 'images', 'resource_type', 'created_by', 'created_at']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'categories': forms.Select(attrs={'class': 'form-control'}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'link': forms.URLInput(attrs={'class': 'form-control'}),
+            'images': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'resource_type': forms.Select(attrs={'class': 'form-control'}),
+        }
+        exclude = ['created_by', 'created_at']

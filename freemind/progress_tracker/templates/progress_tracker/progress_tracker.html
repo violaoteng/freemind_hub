@@ -1,143 +1,272 @@
-{% extends "core/base.html" %}
 {% load static %}
 
-{% block content %}
-<div class="container py-4">
-  <!-- Mood Tracker -->
-  <div class="mood-tracker mb-4 p-3 border rounded">
-    <h4 id="moodHeading"><i class="fas fa-smile" aria-hidden="true"></i> Today's Mood</h4>
-    <div class="d-flex align-items-center mt-3">
-      <label for="moodSlider" class="visually-hidden">Mood level from 1 to 10</label>
-      <input type="range" class="form-range" id="moodSlider" min="1" max="10" value="5" 
-             aria-labelledby="moodHeading moodValue">
-      <span class="ms-3" id="moodValue">5</span>/10
-      <button class="btn btn-primary ms-3" onclick="logMood()" aria-label="Save mood rating">
-        <i class="fas fa-save" aria-hidden="true"></i> Save
-      </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracker | Freemind</title>
+
+    <!-- CSS (Optimized Loading) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+     
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- Mood Tracker (Improved Accessibility) -->
+        <div class="mood-tracker mb-4 p-3 border rounded bg-white shadow-sm">
+            <h2 id="moodHeading" class="h4"><i class="fas fa-smile me-2" aria-hidden="true"></i>Today's Mood</h2>
+            <div class="d-flex align-items-center mt-3">
+                <label for="moodSlider" class="visually-hidden">Mood level slider (1-10)</label>
+                <input type="range" class="form-range" id="moodSlider" min="1" max="10" value="5" 
+                       aria-labelledby="moodHeading moodValue">
+                <span id="moodValue" class="ms-3 fw-bold">5</span><span class="text-muted">/10</span>
+                <button class="btn btn-primary ms-3" onclick="logMood()" aria-label="Save mood rating">
+                    <i class="fas fa-save me-1" aria-hidden="true"></i>Save
+                </button>
+            </div>
+        </div>
+
+        <!-- PHQ-9 Survey -->
+        <div class="card mb-4 shadow-sm" id="surveySection">
+          <div class="card-header bg-white">
+              <h2 class="h4 mb-0"><i class="bi bi-clipboard2-pulse me-2" aria-hidden="true"></i>PHQ-9 Survey</h2>
+          </div>
+          <div class="card-body">
+              <form id="phq9Form" aria-labelledby="phq9Heading">
+                  <p id="phq9Heading" class="text-muted mb-4">Over the last 2 weeks, how often have you been bothered by...</p>
+                  <div id="phq9Questions" class="mb-4" role="group"></div>
+                  <button type="button" class="btn btn-success w-100 py-2" onclick="submitPHQ9()" aria-label="Submit PHQ-9 survey">
+                      <i class="bi bi-send-check me-2" aria-hidden="true"></i>Submit Survey
+                  </button>
+              </form>
+          </div>
+      </div>
+
+        <!-- Progress Pie Chart (Final Version) -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2" aria-hidden="true"></i>Your Progress</h2>
+            </div>
+            <div class="card-body text-center py-4">
+                <div class="chart-container" style="width: 70%; max-width: 300px; margin: 0 auto;">
+                    <canvas id="progressPieChart" height="200" aria-label="Progress visualization" role="img"></canvas>
+                </div>
+                <p class="text-muted mt-3 mb-0">Track your mental health journey</p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- PHQ-9 Survey - Dynamic with Accessibility -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h3 id="surveyTitle"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i> PHQ-9 Depression Survey</h3>
-    </div>
-    <div class="card-body">
-      <form id="phq9Form" aria-labelledby="surveyTitle">
-        <p class="text-muted">Over the last 2 weeks, how often have you been bothered by...</p>
-        
-        <div id="phq9Questions" class="mb-3" role="group" aria-labelledby="surveyTitle"></div>
-        
-        <button type="button" class="btn btn-success" onclick="submitPHQ9()" aria-label="Submit PHQ-9 survey">
-          <i class="bi bi-send-check" aria-hidden="true"></i> Submit Survey
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Progress Chart -->
-  <div class="card">
-    <div class="card-header">
-      <h3><i class="bi bi-graph-up"></i> Your Progress</h3>
-    </div>
-    <div class="card-body">
-      <canvas id="progressChart" height="300" aria-label="Mental health progress chart"></canvas>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Mood Tracker (unchanged)
-const moodSlider = document.getElementById('moodSlider');
-const moodValue = document.getElementById('moodValue');
-moodSlider.oninput = () => moodValue.textContent = moodSlider.value;
-
-// PHQ-9 Questions - Enhanced Dynamic Version
-const phq9Questions = [
-  "Little interest in doing things",
-  "Feeling down or hopeless",
-  "Trouble sleeping or sleeping too much",
-  "Feeling tired or having little energy",
-  "Poor appetite or overeating",
-  "Feeling bad about yourself",
-  "Trouble concentrating",
-  "Moving/speaking slowly or being fidgety",
-  "Thoughts of self-harm"
-];
-
-const phq9Container = document.getElementById('phq9Questions');
-phq9Questions.forEach((q, i) => {
-  const questionId = `phq9-q${i+1}`;
-  phq9Container.innerHTML += `
-    <div class="mb-3">
-      <label for="${questionId}" class="form-label">${i+1}. ${q}</label>
-      <select 
-        class="form-select" 
-        id="${questionId}" 
-        name="q${i+1}"
-        aria-required="true"
-        aria-describedby="help-${questionId}"
-      >
-        <option value="0">Not at all</option>
-        <option value="1">Several days</option>
-        <option value="2">More than half the days</option>
-        <option value="3">Nearly every day</option>
-      </select>
-      <small id="help-${questionId}" class="form-text text-muted">
-        Select how often you've experienced this
-      </small>
-    </div>
-  `;
-});
-
-// API Functions (unchanged)
-async function logMood() {
-  try {
-    const response = await fetch('/log_mood/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}'
-      },
-      body: JSON.stringify({ mood: moodSlider.value })
-    });
-    const data = await response.json();
-    showToast('Mood saved successfully!');
-    updateChart();
-  } catch (error) {
-    console.error('Error saving mood:', error);
-    showToast('Failed to save mood', 'error');
-  }
-}
-
-async function submitPHQ9() {
-  try {
-    const responses = {};
-    phq9Questions.forEach((_, i) => {
-      responses[`q${i+1}`] = parseInt(document.getElementById(`phq9-q${i+1}`).value);
-    });
+    <!-- JavaScript (Optimized Loading) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    const response = await fetch('/submit_phq9/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}'
-      },
-      body: JSON.stringify(responses)
-    });
+    <script>
+        // Global Variables
+        let progressChart;
+        const moodSlider = document.getElementById('moodSlider');
+        const moodValue = document.getElementById('moodValue');
     
-    const data = await response.json();
-    showToast(`PHQ-9 Score: ${data.score} (${getSeverity(data.score)})`);
-    updateChart();
-  } catch (error) {
-    console.error('Error submitting PHQ-9:', error);
-    showToast('Failed to submit survey', 'error');
-  }
-}
-
-// Rest of your code remains unchanged...
-</script>
-{% endblock %}
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            moodSlider.addEventListener('input', () => moodValue.textContent = moodSlider.value);
+            initializePHQ9Questions();
+            initializeProgressChart();
+            loadProgressData();
+        });
+    
+        // PHQ-9 Questions Setup
+        function initializePHQ9Questions() {
+            const phq9Questions = [
+                "Little interest in doing things",
+                "Feeling down or hopeless",
+                "Trouble sleeping or sleeping too much",
+                "Feeling tired or having little energy",
+                "Poor appetite or overeating",
+                "Feeling bad about yourself",
+                "Trouble concentrating",
+                "Moving/speaking slowly or being fidgety",
+                "Thoughts of self-harm"
+            ];
+    
+            const phq9Container = document.getElementById('phq9Questions');
+            phq9Questions.forEach((question, index) => {
+                const questionId = `phq9-q${index+1}`;
+                phq9Container.innerHTML += `
+                    <div class="mb-3">
+                        <label for="${questionId}" class="form-label">${index+1}. ${question}</label>
+                        <select class="form-select" id="${questionId}" name="${questionId}" required>
+                            <option value="" selected disabled>Select option</option>
+                            <option value="0">I haven't experienced this (0)</option>
+                            <option value="1">Frequently (1)</option>
+                            <option value="2">Daily(2)</option>
+                            <option value="3">Occasionally (3)</option>
+                        </select>
+                    </div>
+                `;
+            });
+        }
+    
+        // Chart Initialization
+        function initializeProgressChart() {
+            const ctx = document.getElementById('progressPieChart').getContext('2d');
+            progressChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive Days', 'Needs Attention'],
+                    datasets: [{
+                        data: [50, 50],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.9)',
+                            'rgba(255, 99, 132, 0.9)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.label}: ${context.raw}%`
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+    
+        // Data Loading
+        async function loadProgressData() {
+            try {
+                const response = await fetch('/progress_tracker/get_progress_data/');
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.message || 'Failed to load data');
+                
+                updateChart(data);
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(error.message, 'error');
+            }
+        }
+    
+        function updateChart(data) {
+            progressChart.data.datasets[0].data = [
+                data.positive_days || 50, 
+                data.needs_attention || 50
+            ];
+            progressChart.update();
+        }
+    
+        // Mood Logging
+        async function logMood() {
+            try {
+                const response = await fetch('/progress_tracker/log_mood/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ mood: moodSlider.value })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to save mood');
+                
+                showToast(data.message || 'Mood saved successfully!');
+                loadProgressData();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+    
+        // PHQ-9 Submission
+        async function submitPHQ9() {
+            try {
+                // Collect responses
+                const responses = {};
+                let allAnswered = true;
+                
+                for (let i = 1; i <= 9; i++) {
+                    const select = document.getElementById(`phq9-q${i}`);
+                    if (!select || !select.value) {
+                        allAnswered = false;
+                        break;
+                    }
+                    responses[`q${i}`] = select.value;
+                }
+    
+                if (!allAnswered) {
+                    throw new Error('Please answer all questions');
+                }
+    
+                // Show loading state
+                const submitBtn = document.querySelector('#phq9Form button');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...';
+    
+                const response = await fetch('/progress_tracker/submit_phq9/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(responses)
+                });
+    
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to submit survey');
+    
+                showToast(`PHQ-9 submitted! Score: ${data.score} (${data.severity})`);
+                loadProgressData();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                const submitBtn = document.querySelector('#phq9Form button');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send-check me-2"></i>Submit Survey';
+                }
+            }
+        }
+    
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast show position-fixed bg-${type === 'error' ? 'danger' : 'success'} text-white`;
+            toast.style.zIndex = '9999';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.maxWidth = '350px';
+    
+            toast.innerHTML = `
+                <div class="toast-body d-flex justify-content-between align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close btn-close-white ms-3" 
+                            onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+    
+            // Append to modal if exists, otherwise to body
+            const modal = document.querySelector('.modal-content');
+            const container = modal || document.body;
+            container.appendChild(toast);
+    
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

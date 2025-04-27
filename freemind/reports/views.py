@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError
 from django.contrib.auth.decorators import user_passes_test
 from django.utils import timezone
 from datetime import timedelta
@@ -11,7 +11,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from openpyxl import Workbook
-from datetime import datetime
 from django.db.models.functions import TruncMonth
 from django.utils.timezone import make_aware
 from django.db.models import F, ExpressionWrapper, FloatField
@@ -25,27 +24,73 @@ def is_admin(user):
 
 @user_passes_test(is_admin)
 def view_reports(request):
+    try:
+        # First try to get cached data
+        cache_key = f'reports_data_{timezone.now().date()}'
+        cached_data = cache.get(cache_key)
+        
+        if cached_data:
+            return render(request, 'reports/view_reports.html', cached_data)
 
-    cache_key = f'reports_data_{timezone.now().date()}'
-    data = cache.get(cache_key)
-    
-    if not data:
-        # Generate your report data
-        data = { ... }
-        cache.set(cache_key, data, timeout=3600)
-    try:     
+        # Generate fresh data if cache is empty
         today = timezone.now().date()
-        week_ago = today - timedelta(days=7)
-        month_ago = today - timedelta(days=30)
+        start_of_week = today - timedelta(days=today.weekday())  # Monday of current week
+        start_of_month = today.replace(day=1)  # First day of current month
 
+        # Get filter from URL parameters
+        filter_param = request.GET.get('filter', 'all')
+
+        # Base queryset with filtering
+        appointments = Appointment.objects.all()
+        if filter_param == 'today':
+            appointments = appointments.filter(date__date=today)
+        elif filter_param == 'week':
+            appointments = appointments.filter(date__gte=start_of_week)
+        elif filter_param == 'month':
+            appointments = appointments.filter(date__gte=start_of_month)
+
+        # Calculate status counts with percentages
+        status_counts = Appointment.objects.values('status') \
+                                .annotate(count=Count('status')) \
+                                .order_by('-count')
+        total_count = sum(item['count'] for item in status_counts)
+        for item in status_counts:
+            item['percentage'] = (item['count'] / total_count) * 100 if total_count > 0 else 0
+
+        # Get therapist workload
+        therapist_workload = Therapist.objects.annotate(
+            total_appointments=Count('therapist_appointments'),
+            completed=Count('therapist_appointments', 
+                          filter=Q(therapist_appointments__status='Completed')),
+            cancelled=Count('therapist_appointments', 
+                          filter=Q(therapist_appointments__status='Cancelled')),
+            completion_rate=ExpressionWrapper(
+                F('completed') * 100.0 / F('total_appointments'),
+                output_field=FloatField()
+            ),
+            no_show=Count('therapist_appointments', 
+                        filter=Q(therapist_appointments__status='No Show'))
+        ).order_by('-total_appointments').select_related('user')
+
+        # Get availability stats
+        availability_stats = {
+            'total_slots': TherapistAvailability.objects.filter(is_active=True).count(),
+            'booked_slots': Appointment.objects.filter(
+                therapist__availabilities__is_active=True
+            ).distinct().count(),
+            'utilization_rate': round(
+                (Appointment.objects.count() / 
+                 TherapistAvailability.objects.filter(is_active=True).count()) * 100, 2
+            ) if TherapistAvailability.objects.filter(is_active=True).count() else 0,
+        }
+
+        # Prepare context
         context = {
             'today': today,
-            'appointment_stats': {
-                'total': Appointment.objects.count(),
-                'today': Appointment.objects.filter(date__date=today).count(),
-                'week': Appointment.objects.filter(date__gte=week_ago).count(),
-                'month': Appointment.objects.filter(date__gte=month_ago).count(),
-            },
+            'total_appointments': appointments.count(),
+            'today_appointments': Appointment.objects.filter(date__date=today).count(),
+            'weekly_appointments': Appointment.objects.filter(date__gte=start_of_week).count(),
+            'monthly_appointments': Appointment.objects.filter(date__gte=start_of_month).count(),
             'monthly_trends': [
                 {'month': item['month'].strftime('%Y-%m'), 'count': item['count']}
                 for item in Appointment.objects.annotate(month=TruncMonth('date'))
@@ -53,34 +98,28 @@ def view_reports(request):
                     .annotate(count=Count('id'))
                     .order_by('month')
             ],
-            'status_counts': Appointment.objects.values('status')
-                                .annotate(count=Count('status'))
-                                .order_by('-count'),
-            'therapist_workload': Therapist.objects.annotate(
-                total_appointments=Count('therapist_appointments'),
-                completed=Count('therapist_appointments', filter=Q(therapist_appointments__status='Completed')),
-                cancelled=Count('therapist_appointments', filter=Q(therapist_appointments__status='Cancelled')),
-                completion_rate=ExpressionWrapper(
-                    F('completed') * 100.0 / F('total_appointments'),
-                    output_field=FloatField()
-                ),
-                no_show=Count('therapist_appointments', filter=Q(therapist_appointments__status='No Show'))
-            ).order_by('-total_appointments'),
-            'availability_stats': {
-                'total_slots': TherapistAvailability.objects.filter(is_active=True).count(),
-                'booked_slots': Appointment.objects.filter(
-                    therapist__availabilities__is_active=True
-                ).distinct().count(),
-                'utilization_rate': round(
-                    (Appointment.objects.count() / TherapistAvailability.objects.filter(is_active=True).count()) * 100, 2
-                ) if TherapistAvailability.objects.filter(is_active=True).count() else 0,
-            },
+            'status_counts': status_counts,
+            'therapist_workload': therapist_workload,
+            'availability_stats': availability_stats,
+            'all_therapists': Therapist.objects.all(),
+            'all_statuses': Appointment.STATUS_CHOICES,
+            'current_filter': filter_param,
+            'report_date': timezone.now().strftime("%Y-%m-%d %H:%M")
         }
+
+        # Cache the data for 1 hour (3600 seconds)
+        try:
+            cache.set(cache_key, context, timeout=3600)
+        except Exception as cache_error:
+            print(f"Cache error (non-critical): {str(cache_error)}")
+            # Continue without caching if there's an error
+
         return render(request, 'reports/view_reports.html', context)
-    
+
     except Exception as e:
         print(f"Error in view_reports: {str(e)}")
-        raise
+        # Return a proper error response
+        return render(request, 'core/404.html', {'error': str(e)})
 
 @user_passes_test(is_admin)
 def download_report(request):
@@ -95,12 +134,12 @@ def download_report(request):
             return generate_pdf_report(data)
     except Exception as e:
         print(f"Error in download_report: {str(e)}")
-        raise
-
+        return HttpResponseServerError("An error occurred while generating the report. Please try again later.")
+    
 def get_report_data(request, source='full_report'):
     today = timezone.now().date()
     base_data = {
-        'report_date': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'report_date': timezone.now().strftime('%Y-%m-%d %H:%M'),
         'period': {
             'today': today,
             'week_ago': today - timedelta(days=7),
@@ -184,31 +223,84 @@ def generate_pdf_report(data):
                     appt.status
                 ] for appt in data['recent_appointments']
             ])
+            
+            # Create and style table
+            table = Table(table_data, colWidths=[120, 150, 150, 80])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
+                ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+                ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0,0), (-1,0), 10),
+                ('BOTTOMPADDING', (0,0), (-1,0), 12),
+                ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#D9E1F2')),
+                ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+                ('WORDWRAP', (0,0), (-1,-1), True)
+            ]))
+            elements.append(table)
         else:
+            # Full Report Tables
             # Summary Table
-            table_data = [
+            summary_data = [
                 ['Metric', 'Count'],
                 ['Total Appointments', data['appointments']['total']],
                 ['Today', data['appointments']['today']],
                 ['This Week', data['appointments']['week']],
                 ['This Month', data['appointments']['month']]
             ]
+            
+            # Status Breakdown Table
+            status_data = [['Status', 'Count', 'Percentage']]
+            status_data.extend([
+                [item['status'], item['count'], f"{item.get('percentage', 0):.1f}%"] 
+                for item in data.get('status_counts', [])
+            ])
+            
+            # Therapist Workload Table
+            therapist_data = [['Therapist', 'Total', 'Completed', 'Cancelled', 'No Show', 'Rate']]
+            therapist_data.extend([
+                [therapist.user.get_full_name(), 
+                 therapist.total_appointments,
+                 therapist.completed,
+                 therapist.cancelled,
+                 therapist.no_show,
+                 f"{therapist.completion_rate:.1f}%" if therapist.completion_rate else "N/A"]
+                for therapist in data.get('therapist_workload', [])
+            ])
+            
+            # Availability Stats Table
+            availability_data = [
+                ['Total Slots', data.get('availability_stats', {}).get('total_slots', 'N/A')],
+                ['Booked Slots', data.get('availability_stats', {}).get('booked_slots', 'N/A')],
+                ['Utilization Rate', f"{data.get('availability_stats', {}).get('utilization_rate', 0)}%"]
+            ]
+            
+            # Create all tables
+            tables = [
+                ('Summary', summary_data, [150, 80]),
+                ('Status Breakdown', status_data, [100, 80, 80]),
+                ('Therapist Workload', therapist_data, [150, 60, 60, 60, 60, 60]),
+                ('Availability Statistics', availability_data, [150, 80])
+            ]
+            
+            for title, t_data, col_widths in tables:
+                elements.append(Paragraph(title, styles['Heading2']))
+                table = Table(t_data, colWidths=col_widths)
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+                    ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0,0), (-1,0), 10),
+                    ('BOTTOMPADDING', (0,0), (-1,0), 12),
+                    ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#D9E1F2')),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+                    ('WORDWRAP', (0,0), (-1,-1), True)
+                ]))
+                elements.append(table)
+                elements.append(Spacer(1, 12))
 
-        # Create and style table
-        table = Table(table_data, colWidths=[120, 150, 150, 80] if data['source'] == 'recent_activities' else [150, 80])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0,0), (-1,0), 10),
-            ('BOTTOMPADDING', (0,0), (-1,0), 12),
-            ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#D9E1F2')),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('WORDWRAP', (0,0), (-1,-1), True)
-        ]))
-        elements.append(table)
-
+        # Build the document and return response (this was outside the if-else block)
         doc.build(elements)
         pdf_data = buffer.getvalue()
         response = HttpResponse(
@@ -222,6 +314,7 @@ def generate_pdf_report(data):
         return response
     finally:
         buffer.close()
+        
     
 def generate_excel_report(data):
     response = HttpResponse(

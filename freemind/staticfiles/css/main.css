@@ -51,7 +51,7 @@ body {
     background: linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), 
                 url("../img/chat.jpg") no-repeat center center/cover;
     background-size: cover;
-    color: #970747;
+    color:black;
     margin: 0;
 }
 
@@ -104,6 +104,26 @@ body {
     --light-pink: #ff88cc;
     --white: #ffffff;
 }
+
+
+.list-group-horizontal {
+    flex-direction: row;
+}
+.list-group-horizontal .list-group-item {
+    margin-bottom: 0;
+    margin-right: 5px;
+}
+.list-group-horizontal .list-group-item:first-child {
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 4px;
+}
+.list-group-horizontal .list-group-item:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 0;
+    margin-right: 0;
+}
+
+
 
 /* Common Section Styling */
 .section-title {
@@ -783,3 +803,37 @@ body {
     letter-spacing: 2px;
     color: #ff3385; /* Slightly darker pink */
 }
+
+#statusPieChart {
+  width: 100% !important;
+  height: 200px !important;
+}
+
+/* Add to your CSS */
+canvas {
+    min-height: 200px;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Smooth transitions */
+#surveySection, #dashboardSection {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Loading spinner */
+.spinner-border {
+    vertical-align: middle;
+}
+
+.toast {
+    z-index: 9999;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.modal-content {
+    position: relative;
+}
+

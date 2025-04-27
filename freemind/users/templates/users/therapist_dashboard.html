@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h2>Therapist Dashboard</h2>
     <p>Welcome, {{ user.username}}! Manage appointments and view patient records.</p>
-    
+
     <h3>Notifications</h3>
     <ul>
       {% for notification in notifications %}
@@ -22,7 +22,14 @@
     <ul>
       <li><a href="{% url 'appointment_list' %}">View Your Appointments</a></li>
       <li><a href="{% url 'manage_availability' %}">Set Availability</a></li>
-
+      {% for patient in patients %}
+        <a href="{% url 'chats:chat_view' patient.user.username %}" class="btn btn-sm btn-outline-primary ms-2">
+            <i class="fas fa-comments"></i> Chat with {{ patient.user.username }}
+        </a>
+      {% empty %}
+        <p>No patients matched yet.</p>
+      {% endfor %}
+      
       {% for appointment in appointments %}
         <li>
            Appointment on {{ appointment.date|date:"M d, Y" }} with {{ appointment.patient.username }}

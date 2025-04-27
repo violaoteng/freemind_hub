@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h3>Chat with {{ other_user.first_name }} {{ other_user.last_name }}</h3>
+
+<div id="chat-box" class="mb-3" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+  {% include 'chats/partials/message_list.html' %}
+</div>
+
+<form method="post" id="chat-form">
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    <label for="{{ form.content.id_for_label }}" class="form-label">Message</label>
+    {{ form.content }}
+    {% if form.content.errors %}
+      <div class="text-danger">
+        {{ form.content.errors }}
+      </div>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-primary">Send</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  // Function to automatically scroll to the bottom of the chat box
+  function scrollToBottom() {
+    const chatBox = document.getElementById("chat-box");
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Load messages from the server initially and update the chat box
+  function loadMessages() {
+    $.get("{% url 'chats:load_messages' other_user.username %}", function(data) {
+      $("#chat-box").html(data.html);
+      scrollToBottom();
+    });
+  }
+
+  // Set interval to load messages every 5 seconds (polling)
+  setInterval(loadMessages, 5000);
+
+  // WebSocket connection setup for real-time messaging
+  var username = "{{ other_user.username }}";  // Pass the username dynamically
+  var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chats/' + username + '/');
+
+  // WebSocket event listener for incoming messages
+  chatSocket.onmessage = function(e) {
+      var data = JSON.parse(e.data);
+      var message = data['message'];
+      var sender = data['sender'];
+      var timestamp = data['timestamp'];
+
+      // Display the message in the chat box
+      var chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML += "<p><strong>" + sender + ":</strong> " + message + " <em>" + timestamp + "</em></p>";
+      scrollToBottom();  // Scroll to the bottom after new message
+  };
+
+  // Handle form submission and send message via WebSocket
+  document.querySelector('#chat-form').onsubmit = function(e) {
+    e.preventDefault();  // Prevent form from reloading the page
+
+    var messageInputDom = document.querySelector('#id_content');
+    var message = messageInputDom.value;
+
+    // Send the message to WebSocket
+    chatSocket.send(JSON.stringify({'message': message}));
+
+    messageInputDom.value = '';
+  };
+
+  document.querySelector('#id_content').focus();
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% for msg in messages %}
+  <div class="mb-2 {% if msg.sender == request.user %}text-end{% else %}text-start{% endif %}">
+    <div class="d-inline-block p-2 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}">
+      <strong>{{ msg.sender.first_name }}:</strong> {{ msg.content }}
+      <small class="d-block text-muted" style="font-size: 0.8rem;">{{ msg.timestamp|date:"M d, H:i" }}</small>
+      
+      {% if request.user == msg.sender %}
+        <button class="btn btn-sm btn-danger delete-btn mt-1" data-id="{{ msg.id }}">Delete</button>
+      {% endif %}
+    </div>
+  </div>
+{% empty %}
+  <p class="text-muted">No messages yet.</p>
+{% endfor %}
