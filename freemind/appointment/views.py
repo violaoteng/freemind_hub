@@ -9,11 +9,11 @@ from django.contrib import messages
 from .models import Appointment, TherapistAvailability
 from .forms import AppointmentForm, TherapistAvailabilityForm
 from users.models import Therapist, Profile, Notification
+import uuid
 
 # appointment/views.py
 @login_required
 def book_appointment(request):
-    
     try:
         profile = Profile.objects.get(user=request.user)
         assigned_therapist = profile.assigned_therapist
@@ -43,13 +43,13 @@ def book_appointment(request):
             if timezone.is_naive(appointment.date):
                 appointment.date = timezone.make_aware(appointment.date)
 
-            if appointment.date <= timezone.now() + timezone.timedelta(hours=24):
-                messages.error(request, "Appointments must be booked at least 24 hours in advance.")
+           # if appointment.date <= timezone.now() + timezone.timedelta(hours=24):
+            #    messages.error(request, "Appointments must be booked at least 24 hours in advance.")
+            #  return redirect('book_appointment')
+
+            if settings.DEBUG and appointment.date <= timezone.now():
+                messages.error(request, "Appointments cannot be in the past.")
                 return redirect('book_appointment')
-            
-        else:
-            initial_data = request.session.get('last_appointment', {})
-            form = AppointmentForm(therapist=assigned_therapist, initial=initial_data)    
 
             appointment_end_time = appointment.date + timezone.timedelta(minutes=duration)
 
@@ -74,10 +74,16 @@ def book_appointment(request):
                 messages.error(request, "The selected time slot is already booked. Please choose another time.")
                 return redirect('book_appointment')
 
+            #appointment.save()
+
+            if settings.DEBUG:appointment.status = 'Confirmed'
+            appointment.room_name = f"therapy-session-{uuid.uuid4().hex[:8]}"
             appointment.save()
 
+
             # Send email notification
-            send_mail(
+            if not settings.TESTING:
+              send_mail(
                 "New Appointment Booked",
                 f"Dear {assigned_therapist.user.username},\n\nA new appointment has been booked by {request.user.username} on {appointment.date}.\n\nDuration: {duration} minutes",
                 settings.EMAIL_HOST_USER,
@@ -90,29 +96,47 @@ def book_appointment(request):
             )
 
             messages.success(request, "Appointment booked successfully!")
-            return redirect('book_appointment')
+            request.session.pop('last_appointment', None)
+            response = redirect('book_appointment')
+            response.set_cookie('preferred_duration', duration, max_age=3600*24*30)  
+            return response
+        else:
+            initial_data = request.session.get('last_appointment', {})
+            form = AppointmentForm(therapist=assigned_therapist, initial=initial_data)
     else:
-        form = AppointmentForm(therapist=assigned_therapist)
+        initial_data = request.session.get('last_appointment', {})
+        preferred_duration = request.COOKIES.get('preferred_duration')
+        if preferred_duration:
+           initial_data['duration'] = preferred_duration
 
-    appointments = Appointment.objects.filter(patient=request.user).order_by('date')
-    
-    # Add context variables for template logic
+        form = AppointmentForm(therapist=assigned_therapist, initial=initial_data)
+
+    appointments = Appointment.objects.filter( patient=request.user, date__gte=timezone.now()).order_by('date')
     now = timezone.now()
+
+   # for appointment in appointments:
+    #    appointment.can_join_session = (
+     #       appointment.status == 'Confirmed' and 
+    #        now >= appointment.date - timezone.timedelta(minutes=15) and
+    #        now <= appointment.date + timezone.timedelta(minutes=appointment.duration)
+    #  )
+
     for appointment in appointments:
-        # Can join session if appointment is confirmed and within the valid time window
-        appointment.can_join_session = (
-            appointment.status == 'confirmed' and 
-            now >= appointment.date - timezone.timedelta(minutes=15) and  # 15 minutes before
-            now <= appointment.date + timezone.timedelta(minutes=appointment.duration))  # duration after
-        
-        # Can be cancelled if it's pending/confirmed and more than 24 hours away
+        appointment.can_join_session = (appointment.status == 'Confirmed' and 
+            (settings.DEBUG or 
+            (now >= appointment.date - timezone.timedelta(minutes=15) and
+            now <= appointment.date + timezone.timedelta(minutes=appointment.duration)))
+        )
+
         appointment.can_be_cancelled = (
-            appointment.status in ['pending', 'confirmed'] and
+            appointment.status in ['Pending', 'Confirmed'] and
             appointment.date > now + timezone.timedelta(hours=24)
         )
+        
 
     return render(request, 'appointment/book_appointment.html', {
         'form': form,
+        'therapist': assigned_therapist,
         'appointments': appointments,
         'today': now.date(),
     })

@@ -17,7 +17,7 @@ def contact(request):
 
         send_mail(subject, body, email, ['info@freemind.com'])
         messages.success(request, "Your message has been sent successfully!")
-        return redirect("contact")  # Redirect back to contact page
+        return redirect("contact")  
     return render(request, 'core/contact.html')
 
 

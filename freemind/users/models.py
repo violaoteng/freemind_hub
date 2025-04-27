@@ -17,7 +17,7 @@ def validate_uploaded_file_size(value):
 
 class Specialization(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    created_at = models.DateTimeField(default=timezone.now)  # Helpful for auditing
+    created_at = models.DateTimeField(default=timezone.now, editable=False) # Helpful for auditing
     
     class Meta:
         ordering = ['name']  # Always show in alphabetical order
@@ -36,6 +36,12 @@ class User(AbstractUser):
 
     groups = models.ManyToManyField(Group, related_name="custom_user_groups", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions", blank=True)
+
+    date_joined = models.DateTimeField(
+        ('date joined'), 
+        default=timezone.now,
+        editable=False
+    )
 
     
 class Profile(models.Model):
@@ -146,7 +152,7 @@ class AssignedTherapist(models.Model):
         return f"{self.patient.user.username} -> {self.therapist.user.username}"
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

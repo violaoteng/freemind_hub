@@ -29,10 +29,13 @@ urlpatterns = [
     path('video/', include('video.urls')),
     path('resources/',include('resources.urls')),
     path('reports/', include('reports.urls')),
-    path('progress_tracker,', include('progress_tracker.urls')),
+    path('progress_tracker/', include('progress_tracker.urls')),
+    path('chats/', include('chats.urls', namespace='chats')),
+    
 ]
 
 if settings.DEBUG:
+   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)   
 
 

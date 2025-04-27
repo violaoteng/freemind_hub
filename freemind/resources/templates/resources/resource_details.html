@@ -1,25 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ resource.title }}</title>
-</head>
-<body>
-    <h1>{{ resource.title }}</h1>
-    <p>{{ resource.description }}</p>
-    {% if resource.file %}
-        <p><a href="{{ resource.file.url }}" download>Download File</a></p>
-    {% endif %}
-    {% if resource.link %}
-        <p><a href="{{ resource.link }}" target="_blank">Visit Link</a></p>
-    {% endif %}
-    {% if resource.images %}
-        <img src="{{ resource.images.url }}" alt="{{ resource.title }}">
-    {% endif %}
-    <p><strong>Category:</strong> {{ resource.categories }}</p>
-    <p><strong>Created by:</strong> {{ resource.created_by }}</p>
-    <p><strong>Created at:</strong> {{ resource.created_at }}</p>
-    <a href="{% url 'resource_list' %}">Back to Resources</a>
-</body>
-</html>
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Back Button -->
+            <a href="{% url 'resource_content' %}" class="btn btn-light mb-4 rounded-pill shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back to Resources
+            </a>
+            
+            <!-- Main Card -->
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <!-- Image Header -->
+                {% if resource.images %}
+                <div class="resource-image-container">
+                    <img src="{{ resource.images.url }}" class="card-img-top" alt="{{ resource.title }}">
+                    <div class="image-overlay"></div>
+                </div>
+                {% endif %}
+                
+                <!-- Card Body -->
+                <div class="card-body p-4 p-md-5">
+                    <!-- Title and Category -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h1 class="display-5 fw-bold text-primary">{{ resource.title }}</h1>
+                            <span class="badge bg-primary-soft text-primary rounded-pill">{{ resource.categories }}</span>
+                        </div>
+                        <small class="text-muted">{{ resource.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-5">
+                        <p class="lead text-muted">{{ resource.description }}</p>
+                    </div>
+                    
+                    <!-- File Section -->
+                    {% if resource.file %}
+                    <div class="resource-file-card mb-4 p-4 bg-light rounded">
+                        <div class="d-flex align-items-center">
+                            <div class="file-icon me-3">
+                                <i class="far fa-file-alt fa-3x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">Attached File</h5>
+                                <p class="small text-muted mb-2">{{ resource.file.name|cut:"resources/" }}</p>
+                                <div class="btn-group">
+                                    <a href="{{ resource.file.url }}" target="_blank" class="btn btn-primary rounded-pill me-2">
+                                        <i class="fas fa-eye me-1"></i> View
+                                    </a>
+                                    <a href="{{ resource.file.url }}" download class="btn btn-outline-primary rounded-pill">
+                                        <i class="fas fa-download me-1"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- External Link -->
+                    {% if resource.link %}
+                    <div class="resource-link-card p-4 bg-light rounded mb-4">
+                        <h5 class="mb-3"><i class="fas fa-link text-primary me-2"></i>External Resource</h5>
+                        <a href="{{ resource.link }}" target="_blank" class="btn btn-success rounded-pill">
+                            <i class="fas fa-external-link-alt me-1"></i> Visit Resource
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Additional Info -->
+                    <div class="d-flex justify-content-between mt-5 pt-4 border-top">
+                        <div>
+                            <small class="text-muted">Uploaded by {{ resource.created_by }}</small>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill ms-2">
+                                <i class="fas fa-share-alt me-1"></i> Share
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Styles */
+    .resource-image-container {
+        height: 350px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .resource-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .resource-image-container:hover img {
+        transform: scale(1.03);
+    }
+    
+    .image-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.1));
+    }
+    
+    .resource-file-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--bs-primary);
+    }
+    
+    .resource-file-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .resource-link-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--bs-success);
+    }
+    
+    .resource-link-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .bg-primary-soft {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+</style>
+{% endblock %}

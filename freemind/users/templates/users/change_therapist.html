@@ -11,7 +11,7 @@
             <label class="form-label">Therapist Specialization</label>
             <div>
                 {% for spec in specializations %}
-                     <input type="checkbox" name="specialization" value="{{ spec.id }}">"> {{ spec.name }}<br>
+                     <input type="checkbox" name="specialization" value="{{ spec.id }}"> {{ spec.name }}<br>
                 {% endfor %}
             </div>
         </div>

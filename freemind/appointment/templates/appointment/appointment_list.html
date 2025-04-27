@@ -49,7 +49,7 @@
             {% for appointment in appointments %}
             <tr>
                 <td>{{ appointment.patient.username }}</td>
-                <td>{{ appointment.date|date:"M d, Y" }}</td>
+                <td>{{ appointment.date|date:"M d, Y H:i" }}</td>
                 <td>
                     <span class="badge 
                         {% if appointment.status == 'Completed' %}bg-success
@@ -73,7 +73,7 @@
                         <a href="{% url 'cancel_appointment' appointment.id %}" 
                            class="btn btn-sm btn-danger">Cancel</a>
                         
-                        {# Join Session Button - Simplified version that matches view logic #}
+                        {# Join Session Button #}
                         {% now "Y-m-d" as current_date %}
                         {% if appointment.date|date:"Y-m-d" == current_date %}
                             <a href="{% url 'jitsi_meet_view' appointment.id %}" 

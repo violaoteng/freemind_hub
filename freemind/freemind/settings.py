@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +23,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zjr66bg%*)iac+w&gf$3t(4$&!av_f@7&@0u!9nt4%cmhmi=np'
+SECRET_KEY = config('DJANGO_SECRET_KEY')
+
+JWT_SECRET_KEY = config('JWT_SECRET_KEY')
+JITSI_CONFIG = {
+    'APP_ID': 'freemind',
+    'AUDIENCE': 'jitsi',
+    'ISSUER': 'localhost',
+    'SUBJECT': 'meet.jit.si',
+}
+ 
+JITSI_AUDIENCE = JITSI_CONFIG['AUDIENCE']
+JITSI_ISSUER = JITSI_CONFIG['ISSUER']
+JITSI_SUBJECT = JITSI_CONFIG['SUBJECT']
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#TESTING = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+ALLOWED_HOSTS = ['127.0.0.1', 'freemind-hub.onrender.com']
 
 # Application definition
 
@@ -46,11 +63,22 @@ INSTALLED_APPS = [
     'chats',
     'resources',
     'reports',
-    'progress_tracker'
+    'progress_tracker',
+    'django_celery_beat',
 
 
 ]
 ASGI_APPLICATION = "freemind.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)], 
+        },
+    },
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -88,13 +116,9 @@ WSGI_APPLICATION = 'freemind.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
     }
 }
 
@@ -134,7 +158,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
@@ -142,12 +166,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
  
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-#EMAIL_HOST_USER = 'otengviola@gmail.com'
-#EMAIL_HOST_PASSWORD = '1899'  
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'  
+EMAIL_PORT = 1025
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  
 
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 
@@ -163,15 +187,15 @@ LOGIN_URL = '/login_view/'
 
 SESSION_COOKIE_AGE = 3600
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-SESSION_FILE_PATH = '/tmp/django_sessions'
 SESSION_COOKIE_SECURE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+CSRF_COOKIE_SECURE = True
 
 #celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -182,11 +206,24 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Nairobi'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+# Always use HTTPS
+SECURE_SSL_REDIRECT = False
 
+# Prevent clickjacking
+X_FRAME_OPTIONS = 'DENY'
 
+# Hide server info
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# CORS if using APIs
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Maximum upload size (2MB for images, 5MB for files)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  
